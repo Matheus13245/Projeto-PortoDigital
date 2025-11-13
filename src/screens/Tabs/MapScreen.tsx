@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
-import { View, StyleSheet, ActivityIndicator, Text, Image } from "react-native";
+import { View, StyleSheet, ActivityIndicator, Text, Image, TouchableOpacity } from "react-native";
 import MapView, { Marker, Region, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import MapViewDirections from "react-native-maps-directions";
 import mapStyle from "../../config/mapStyle.json";
 import { postos, Posto } from "../../data/postos";
+import FloatingButton from "../../components/ButtonPosto";
 
 const GOOGLE_MAPS_APIKEY = "AIzaSyBp1V7-y6aMDOj2-wRBNFdjpGb47QrSjCY";
 
@@ -13,7 +14,6 @@ export default function MapScreen() {
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [destino, setDestino] = useState<{ latitude: number; longitude: number } | null>(null);
-
   const mapRef = useRef<MapView>(null);
 
   useEffect(() => {
@@ -44,6 +44,69 @@ export default function MapScreen() {
     })();
   }, []);
 
+  const region: Region | undefined = location
+    ? {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }
+    : undefined;
+
+  const handlePressPosto = (posto: Posto) => {
+    setDestino({ latitude: posto.latitude, longitude: posto.longitude });
+  };
+
+  // Função para calcular o posto mais próximo
+  const calcularDistancia = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const toRad = (x: number) => (x * Math.PI) / 180;
+    const R = 6371; // raio da Terra em km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // distância em km
+  };
+
+  const handlePostoMaisProximo = () => {
+    if (!location) return;
+    let menorDistancia = Infinity;
+    let postoMaisProximo: Posto | null = null;
+
+    for (const posto of postos) {
+      const dist = calcularDistancia(
+        location.latitude,
+        location.longitude,
+        posto.latitude,
+        posto.longitude
+      );
+      if (dist < menorDistancia) {
+        menorDistancia = dist;
+        postoMaisProximo = posto;
+      }
+    }
+
+    if (postoMaisProximo) {
+      setDestino({
+        latitude: postoMaisProximo.latitude,
+        longitude: postoMaisProximo.longitude,
+      });
+
+      mapRef.current?.animateToRegion(
+        {
+          latitude: postoMaisProximo.latitude,
+          longitude: postoMaisProximo.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        1000
+      );
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -60,28 +123,17 @@ export default function MapScreen() {
     );
   }
 
-  if (!location) {
+  if (!location || !region) {
     return (
       <View style={styles.center}>
         <Text>Localização não encontrada</Text>
       </View>
     );
   }
-
-  const region: Region = {
-    latitude: location.latitude,
-    longitude: location.longitude,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
-  };
-
-  // Função chamada ao clicar em um posto
-  const handlePressPosto = (posto: Posto) => {
-    setDestino({
-      latitude: posto.latitude,
-      longitude: posto.longitude,
-    });
-  };
+  <FloatingButton
+  title="Posto mais próximo"
+  onPress={handlePostoMaisProximo}
+  />
 
   return (
     <View style={styles.container}>
@@ -94,17 +146,13 @@ export default function MapScreen() {
         followsUserLocation
         initialRegion={region}
       >
-        {/* Marcadores dos postos */}
         {postos.map((posto) => (
           <Marker
             key={posto.id}
-            coordinate={{
-              latitude: posto.latitude,
-              longitude: posto.longitude,
-            }}
+            coordinate={{ latitude: posto.latitude, longitude: posto.longitude }}
             title={posto.nome}
             description={posto.endereco}
-            onPress={() => handlePressPosto(posto)} // 👈 Gera rota ao clicar
+            onPress={() => handlePressPosto(posto)}
           >
             <Image
               source={require("../../assets/gas-station.png")}
@@ -114,7 +162,6 @@ export default function MapScreen() {
           </Marker>
         ))}
 
-        {/* Desenha rota automaticamente quando há destino */}
         {destino && location && (
           <MapViewDirections
             origin={{
@@ -135,6 +182,11 @@ export default function MapScreen() {
           />
         )}
       </MapView>
+
+      {/* Botão flutuante para encontrar o posto mais próximo */}
+      <TouchableOpacity style={styles.button} onPress={handlePostoMaisProximo}>
+        <Text style={styles.buttonText}>Posto mais próximo</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -143,4 +195,15 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   map: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  button: {
+    position: "absolute",
+    bottom: 30,
+    right: 20,
+    backgroundColor: "#007AFF",
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 25,
+    elevation: 4,
+  },
+  buttonText: { color: "#fff", fontWeight: "bold" },
 });
