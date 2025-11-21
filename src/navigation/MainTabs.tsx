@@ -3,37 +3,13 @@ import { View } from "react-native";
 import { Text } from "react-native-paper";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
+import CarInfoScreen from "../screens/Tabs/CarInfoScreen";
+import HealthScreen from "../screens/Tabs/HealthScreen";
 import MapScreen from "../screens/Tabs/MapScreen";
+import ProfileScreen from "../screens/Tabs/ProfileScreen";
+import SettingsScreen from "../screens/Tabs/SettingsScreen";
 
-// 4 placeholders internos (para manter só 1 arquivo de tela externo)
-function CarInfoScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>Informações do Carro (placeholder)</Text>
-    </View>
-  );
-}
-function HealthScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>Saúde / Telemetria (placeholder)</Text>
-    </View>
-  );
-}
-function ProfileScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>Perfil (placeholder)</Text>
-    </View>
-  );
-}
-function SettingsScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>Configurações (placeholder)</Text>
-    </View>
-  );
-}
+
 
 export type TabParamList = {
   CarInfo: undefined;
