@@ -1,11 +1,22 @@
-import React, { useEffect, useRef, useState } from "react";
-import { View, StyleSheet, ActivityIndicator, Text, Image, Alert } from "react-native";
-import MapView, { Marker, Region, Polyline } from "react-native-maps";
-import MapViewDirections from "react-native-maps-directions";
+import React, { useEffect, useState, useRef } from "react";
+import { View, StyleSheet, ActivityIndicator, Text, Image, TouchableOpacity } from "react-native";
+import MapView, { Marker, Region, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
-import Constants from "expo-constants";
+import MapViewDirections from "react-native-maps-directions";
 import mapStyle from "../../config/mapStyle.json";
 import { postos, Posto } from "../../data/postos";
+import FloatingButton from "../../components/ButtonPosto";
+import { useNavigation, useRoute } from "@react-navigation/native";
+
+const GOOGLE_MAPS_APIKEY = "AIzaSyBp1V7-y6aMDOj2-wRBNFdjpGb47QrSjCY";
+
+type MapRouteParams = {
+  rotaDestino?: {
+    latitude: number;
+    longitude: number;
+    nome: string;
+  };
+};
 
 const GOOGLE_API_KEY =
   // @ts-ignore
@@ -67,13 +78,36 @@ function decodePolyline(encoded: string) {
 }
 
 export default function MapScreen() {
+  const navigation = useNavigation<any>();
+  const route = useRoute();
+  const params = route.params as MapRouteParams | undefined;
+
   const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [nearestPosto, setNearestPosto] = useState<Posto | null>(null);
-  const [routeCoords, setRouteCoords] = useState<{ latitude: number; longitude: number }[] | null>(null);
-  const mapRef = useRef<MapView | null>(null);
+  const [destino, setDestino] = useState<{ latitude: number; longitude: number; nome?: string } | null>(null);
 
+  const mapRef = useRef<MapView>(null);
+
+  /** Carrega destino vindo do PostoDetailsScreen */
+  useEffect(() => {
+    if (params?.rotaDestino) {
+      setDestino(params.rotaDestino);
+
+      // Move a câmera direto para o posto
+      mapRef.current?.animateToRegion(
+        {
+          latitude: params.rotaDestino.latitude,
+          longitude: params.rotaDestino.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        1000
+      );
+    }
+  }, [params]);
+
+  /** Obtém localização do usuário */
   useEffect(() => {
     (async () => {
       try {
@@ -83,9 +117,16 @@ export default function MapScreen() {
           setLoading(false);
           return;
         }
-        const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
-        if (loc?.coords) setLocation(loc.coords);
-        else setErrorMsg("Não foi possível obter coordenadas.");
+
+        const loc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Highest,
+        });
+
+        if (loc?.coords) {
+          setLocation(loc.coords);
+        } else {
+          setErrorMsg("Não foi possível obter coordenadas válidas.");
+        }
       } catch (err) {
         console.warn("Erro obter localização:", err);
         setErrorMsg("Erro ao obter localização: " + String(err));
@@ -95,69 +136,82 @@ export default function MapScreen() {
     })();
   }, []);
 
-  useEffect(() => {
+  /** Região inicial do mapa */
+  const region: Region | undefined = location
+    ? {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }
+    : undefined;
+
+  /** Clicar no ícone do posto */
+  const handlePressPosto = (posto: Posto) => {
+    setDestino({
+      latitude: posto.latitude,
+      longitude: posto.longitude,
+      nome: posto.nome,
+    });
+  };
+
+  /** Calcula distância entre 2 pontos (Haversine) */
+  const calcularDistancia = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const toRad = (x: number) => (x * Math.PI) / 180;
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  /** Encontra posto mais próximo */
+  const handlePostoMaisProximo = () => {
     if (!location) return;
-    const nearest = postos.reduce((prev, curr) => {
-      const dPrev = haversineDistance(location, { latitude: prev.latitude, longitude: prev.longitude });
-      const dCurr = haversineDistance(location, { latitude: curr.latitude, longitude: curr.longitude });
-      return dCurr < dPrev ? curr : prev;
-    }, postos[0]);
-    setNearestPosto(nearest);
-  }, [location]);
 
-  async function fetchDirectionsFallback(origin: { latitude: number; longitude: number }, destination: { latitude: number; longitude: number }) {
-    if (!GOOGLE_API_KEY) {
-      const msg = "Fallback: GOOGLE_API_KEY vazia. Verifique sua variável.";
-      console.warn(msg);
-      Alert.alert("Rota (fallback)", msg);
-      return;
+    let menorDistancia = Infinity;
+    let postoMaisProximo: Posto | null = null;
+
+    for (const posto of postos) {
+      const dist = calcularDistancia(
+        location.latitude,
+        location.longitude,
+        posto.latitude,
+        posto.longitude
+      );
+
+      if (dist < menorDistancia) {
+        menorDistancia = dist;
+        postoMaisProximo = posto;
+      }
     }
 
-    const originStr = `${origin.latitude},${origin.longitude}`;
-    const destStr = `${destination.latitude},${destination.longitude}`;
-    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${originStr}&destination=${destStr}&key=${GOOGLE_API_KEY}&mode=driving`;
+    if (postoMaisProximo) {
+      setDestino({
+        latitude: postoMaisProximo.latitude,
+        longitude: postoMaisProximo.longitude,
+        nome: postoMaisProximo.nome,
+      });
 
-    try {
-      console.log("Fallback directions fetch:", url);
-      const res = await fetch(url);
-      const json = await res.json();
-      console.log("Directions API response (fallback):", json);
-
-      if (!res.ok) {
-        const text = `HTTP ${res.status} - ${JSON.stringify(json)}`;
-        console.warn(text);
-        Alert.alert("Directions API erro", text);
-        return;
-      }
-
-      if (!json.routes || json.routes.length === 0) {
-        console.warn("Nenhuma rota retornada (fallback)", json);
-        Alert.alert("Rota", "Nenhuma rota retornada pelo Directions API (fallback).");
-        return;
-      }
-
-      const poly = json.routes[0].overview_polyline?.points;
-      if (!poly) {
-        console.warn("overview_polyline ausente (fallback)", json.routes[0]);
-        Alert.alert("Rota", "overview_polyline ausente na resposta do Directions API.");
-        return;
-      }
-
-      const coords = decodePolyline(poly);
-      setRouteCoords(coords);
-      // ajusta câmera
-      setTimeout(() => {
-        mapRef.current?.fitToCoordinates(
-          [origin, destination, ...coords],
-          { edgePadding: { top: 80, right: 40, bottom: 120, left: 40 }, animated: true }
-        );
-      }, 300);
-    } catch (err) {
-      console.warn("Erro fallback directions fetch:", err);
-      Alert.alert("Erro", "Erro ao buscar rota (fallback): " + String(err));
+      mapRef.current?.animateToRegion(
+        {
+          latitude: postoMaisProximo.latitude,
+          longitude: postoMaisProximo.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        1000
+      );
     }
-  }
+  };
 
+  /** Tratamento de loading e erros */
   if (loading) {
     return (
       <View style={styles.center}>
@@ -174,7 +228,7 @@ export default function MapScreen() {
     );
   }
 
-  if (!location) {
+  if (!location || !region) {
     return (
       <View style={styles.center}>
         <Text>Localização indisponível.</Text>
@@ -182,84 +236,65 @@ export default function MapScreen() {
     );
   }
 
-  const origin = { latitude: location.latitude, longitude: location.longitude };
-
-  const region: Region = {
-    latitude: location.latitude,
-    longitude: location.longitude,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
-  };
-
   return (
     <View style={styles.container}>
       <MapView
-        ref={(r) => {
-          mapRef.current = r;
-        }}
+        ref={mapRef}
+        provider={PROVIDER_GOOGLE}
         style={styles.map}
         showsUserLocation
-        customMapStyle={mapStyle}
         followsUserLocation
+        customMapStyle={mapStyle}
         initialRegion={region}
       >
+        {/* Marcadores dos postos */}
         {postos.map((posto) => (
           <Marker
             key={posto.id}
             coordinate={{ latitude: posto.latitude, longitude: posto.longitude }}
             title={posto.nome}
             description={posto.endereco}
+            onPress={() =>
+              navigation.navigate("PostoDetails", {
+                id: posto.id,
+                nome: posto.nome,
+                latitude: posto.latitude,
+                longitude: posto.longitude,
+              })
+            }
           >
-            <Image source={require("../../assets/gas-station.png")} style={{ width: 35, height: 35 }} resizeMode="contain" />
+            <Image
+              source={require("../../assets/gas-station.png")}
+              style={{ width: 35, height: 35 }}
+            />
           </Marker>
         ))}
 
-        {nearestPosto && (
-          <>
-            <Marker
-              coordinate={{ latitude: nearestPosto.latitude, longitude: nearestPosto.longitude }}
-              title={`Mais próximo: ${nearestPosto.nome}`}
-              pinColor="blue"
-            />
-
-            {GOOGLE_API_KEY ? (
-              <MapViewDirections
-                origin={origin}
-                destination={{ latitude: nearestPosto.latitude, longitude: nearestPosto.longitude }}
-                apikey={GOOGLE_API_KEY}
-                strokeWidth={6}
-                strokeColor="blue"
-                mode="DRIVING"
-                optimizeWaypoints={false}
-                onReady={(result) => {
-                  console.log("MapViewDirections onReady:", result);
-                  if (result?.coordinates && result.coordinates.length > 0) {
-                    setRouteCoords(result.coordinates);
-                    mapRef.current?.fitToCoordinates(result.coordinates, {
-                      edgePadding: { top: 80, right: 40, bottom: 120, left: 40 },
-                      animated: true,
-                    });
-                  }
-                }}
-                onError={(err) => {
-                  console.warn("MapViewDirections onError:", err);
-                  // tenta fallback manual
-                  Alert.alert("MapViewDirections", "Erro no MapViewDirections, tentando fallback manual. Veja logs.");
-                  fetchDirectionsFallback(origin, { latitude: nearestPosto.latitude, longitude: nearestPosto.longitude });
-                }}
-              />
-            ) : (
-              // sem chave: tenta fallback direto
-              <View />
-            )}
-          </>
-        )}
-
-        {/* Desenha a polilinha azul caso tenhamos coords (fetched ou MapViewDirections) */}
-        {routeCoords && routeCoords.length > 0 && (
-          <Polyline coordinates={routeCoords} strokeWidth={6} strokeColor="blue" lineCap="round" />
+        {/* Rota */}
+        {destino && (
+          <MapViewDirections
+            origin={{
+              latitude: location.latitude,
+              longitude: location.longitude,
+            }}
+            destination={destino}
+            apikey={GOOGLE_MAPS_APIKEY}
+            strokeWidth={5}
+            strokeColor="blue"
+            onReady={(result) => {
+              mapRef.current?.fitToCoordinates(result.coordinates, {
+                edgePadding: { top: 100, right: 50, bottom: 100, left: 50 },
+                animated: true,
+              });
+            }}
+          />
         )}
       </MapView>
+
+      {/* Botão flutuante */}
+      <TouchableOpacity style={styles.button} onPress={handlePostoMaisProximo}>
+        <Text style={styles.buttonText}>Posto mais próximo</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -268,4 +303,15 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   map: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  button: {
+    position: "absolute",
+    bottom: 30,
+    right: 20,
+    backgroundColor: "#007AFF",
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 25,
+    elevation: 4,
+  },
+  buttonText: { color: "#fff", fontWeight: "bold" },
 });
