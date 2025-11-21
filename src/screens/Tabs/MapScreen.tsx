@@ -18,6 +18,65 @@ type MapRouteParams = {
   };
 };
 
+const GOOGLE_API_KEY =
+  // @ts-ignore
+  (globalThis as any)?.GOOGLE_API_KEY ||
+  // @ts-ignore
+  (process as any)?.env?.GOOGLE_API_KEY ||
+  (Constants as any)?.expoConfig?.extra?.GOOGLE_API_KEY ||
+  (Constants as any)?.manifest?.extra?.GOOGLE_API_KEY ||
+  "";
+
+function haversineDistance(a: { latitude: number; longitude: number }, b: { latitude: number; longitude: number }) {
+  const toRad = (v: number) => (v * Math.PI) / 180;
+  const R = 6371000;
+  const dLat = toRad(b.latitude - a.latitude);
+  const dLon = toRad(b.longitude - a.longitude);
+  const lat1 = toRad(a.latitude);
+  const lat2 = toRad(b.latitude);
+  const sinDLat = Math.sin(dLat / 2);
+  const sinDLon = Math.sin(dLon / 2);
+  const aHarv = sinDLat * sinDLat + Math.cos(lat1) * Math.cos(lat2) * sinDLon * sinDLon;
+  const c = 2 * Math.atan2(Math.sqrt(aHarv), Math.sqrt(1 - aHarv));
+  return R * c;
+}
+
+/** Decodificador de polyline (Google) */
+function decodePolyline(encoded: string) {
+  let index = 0;
+  const len = encoded.length;
+  let lat = 0;
+  let lng = 0;
+  const coordinates: { latitude: number; longitude: number }[] = [];
+
+  while (index < len) {
+    let b = 0;
+    let shift = 0;
+    let result = 0;
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    const dlat = (result & 1) ? ~(result >> 1) : (result >> 1);
+    lat += dlat;
+
+    shift = 0;
+    result = 0;
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    const dlng = (result & 1) ? ~(result >> 1) : (result >> 1);
+    lng += dlng;
+
+    coordinates.push({ latitude: lat / 1e5, longitude: lng / 1e5 });
+  }
+
+  return coordinates;
+}
+
 export default function MapScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute();
@@ -54,7 +113,7 @@ export default function MapScreen() {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
-          setErrorMsg("Permissão de localização negada");
+          setErrorMsg("Permissão de localização negada.");
           setLoading(false);
           return;
         }
@@ -69,7 +128,7 @@ export default function MapScreen() {
           setErrorMsg("Não foi possível obter coordenadas válidas.");
         }
       } catch (err) {
-        console.error("Erro ao obter localização:", err);
+        console.warn("Erro obter localização:", err);
         setErrorMsg("Erro ao obter localização: " + String(err));
       } finally {
         setLoading(false);
@@ -172,7 +231,7 @@ export default function MapScreen() {
   if (!location || !region) {
     return (
       <View style={styles.center}>
-        <Text>Localização não encontrada</Text>
+        <Text>Localização indisponível.</Text>
       </View>
     );
   }
