@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
+import FavoriteButton from "../../components/FavoriteButton";
 
 type PostoDetailsRouteProps = RouteProp<RootStackParamList, "PostoDetails">;
 type NavigationProps = NativeStackNavigationProp<RootStackParamList, "PostoDetails">;
@@ -10,12 +11,12 @@ type NavigationProps = NativeStackNavigationProp<RootStackParamList, "PostoDetai
 export default function PostoDetailsScreen() {
   const navigation = useNavigation<NavigationProps>();
   const route = useRoute<PostoDetailsRouteProps>();
-
+  
   const posto = route.params;
 
   const handleCriarRota = () => {
     navigation.navigate("Main", {
-      screen: "Map", // <- nome exato da tab onde está o MapScreen!!
+      screen: "Map",
       params: {
         rotaDestino: {
           latitude: posto.latitude,
@@ -35,9 +36,20 @@ export default function PostoDetailsScreen() {
         <Text style={styles.placeholder}>Nenhuma informação ainda...</Text>
       </View>
 
+      {/* Botão para criar rota */}
       <TouchableOpacity style={styles.button} onPress={handleCriarRota}>
         <Text style={styles.buttonText}>Criar rota até o posto</Text>
       </TouchableOpacity>
+
+      {/* Botão de adicionar aos favoritos */}
+      <FavoriteButton
+        posto={{
+          id: posto.id,
+          nome: posto.nome,
+          latitude: posto.latitude,
+          longitude: posto.longitude,
+        }}
+      />
     </View>
   );
 }
@@ -79,6 +91,7 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 10,
     alignItems: "center",
+    marginBottom: 12,
   },
 
   buttonText: {
