@@ -15,39 +15,43 @@ type FavoriteButtonProps = {
 
 export default function FavoriteButton({ posto }: FavoriteButtonProps) {
   const [loading, setLoading] = useState(false);
-  const [alreadyFavorite, setAlreadyFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
-  /** Checa se já está nos favoritos */
+  /** Checa se já está salvo */
+  const checkIfFavorite = async () => {
+    const stored = await AsyncStorage.getItem("@postosFavoritos");
+    const lista: FavoritePosto[] = stored ? JSON.parse(stored) : [];
+
+    const found = lista.some((p) => p.id === posto.id);
+    setIsFavorite(found);
+  };
+
   useEffect(() => {
-    (async () => {
-      const stored = await AsyncStorage.getItem("@postosFavoritos");
-      const lista: FavoritePosto[] = stored ? JSON.parse(stored) : [];
-
-      if (lista.some((p) => p.id === posto.id)) {
-        setAlreadyFavorite(true);
-      }
-    })();
+    checkIfFavorite();
   }, []);
 
-  /** Adiciona aos favoritos */
-  const handleAddFavorite = async () => {
+  /** Alternar favorito */
+  const toggleFavorite = async () => {
     try {
       setLoading(true);
 
       const stored = await AsyncStorage.getItem("@postosFavoritos");
       const lista: FavoritePosto[] = stored ? JSON.parse(stored) : [];
 
-      // Se já existir, não adiciona novamente
-      if (lista.some((p) => p.id === posto.id)) {
-        setAlreadyFavorite(true);
-        return;
+      let updatedList: FavoritePosto[] = [];
+
+      if (isFavorite) {
+        // REMOVE se já está nos favoritos
+        updatedList = lista.filter((p) => p.id !== posto.id);
+      } else {
+        // ADICIONA se ainda não está
+        updatedList = [...lista, posto];
       }
 
-      const novaLista = [...lista, posto];
-      await AsyncStorage.setItem("@postosFavoritos", JSON.stringify(novaLista));
-      setAlreadyFavorite(true);
+      await AsyncStorage.setItem("@postosFavoritos", JSON.stringify(updatedList));
+      setIsFavorite(!isFavorite);
     } catch (err) {
-      console.log("Erro ao salvar favorito:", err);
+      console.log("Erro ao atualizar favoritos:", err);
     } finally {
       setLoading(false);
     }
@@ -55,15 +59,15 @@ export default function FavoriteButton({ posto }: FavoriteButtonProps) {
 
   return (
     <TouchableOpacity
-      style={[styles.button, alreadyFavorite && styles.buttonDisabled]}
-      onPress={handleAddFavorite}
-      disabled={alreadyFavorite || loading}
+      style={[styles.button, isFavorite && styles.buttonUnfavorite]}
+      onPress={toggleFavorite}
+      disabled={loading}
     >
       {loading ? (
         <ActivityIndicator color="#fff" />
       ) : (
         <Text style={styles.text}>
-          {alreadyFavorite ? "Já favorito ✓" : "Adicionar aos favoritos"}
+          {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
         </Text>
       )}
     </TouchableOpacity>
@@ -79,8 +83,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-  buttonDisabled: {
-    backgroundColor: "#5c7eaa",
+  buttonUnfavorite: {
+    backgroundColor: "#c02929",
   },
   text: {
     color: "#fff",
