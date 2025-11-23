@@ -19,7 +19,7 @@ export default function FavoriteButton({ posto }: FavoriteButtonProps) {
 
   /** Checa se já está salvo */
   const checkIfFavorite = async () => {
-    const stored = await AsyncStorage.getItem("@postosFavoritos");
+    const stored = await AsyncStorage.getItem("@postos_favoritos");
     const lista: FavoritePosto[] = stored ? JSON.parse(stored) : [];
 
     const found = lista.some((p) => p.id === posto.id);
@@ -35,20 +35,20 @@ export default function FavoriteButton({ posto }: FavoriteButtonProps) {
     try {
       setLoading(true);
 
-      const stored = await AsyncStorage.getItem("@postosFavoritos");
+      const stored = await AsyncStorage.getItem("@postos_favoritos");
       const lista: FavoritePosto[] = stored ? JSON.parse(stored) : [];
 
       let updatedList: FavoritePosto[] = [];
 
       if (isFavorite) {
-        // REMOVE se já está nos favoritos
+        // Remove
         updatedList = lista.filter((p) => p.id !== posto.id);
       } else {
-        // ADICIONA se ainda não está
+        // Adiciona
         updatedList = [...lista, posto];
       }
 
-      await AsyncStorage.setItem("@postosFavoritos", JSON.stringify(updatedList));
+      await AsyncStorage.setItem("@postos_favoritos", JSON.stringify(updatedList));
       setIsFavorite(!isFavorite);
     } catch (err) {
       console.log("Erro ao atualizar favoritos:", err);

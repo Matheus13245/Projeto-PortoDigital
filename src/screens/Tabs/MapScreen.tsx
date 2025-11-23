@@ -1,11 +1,18 @@
 import React, { useEffect, useState, useRef } from "react";
-import { View, StyleSheet, ActivityIndicator, Text, Image, TouchableOpacity } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  Text,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 import MapView, { Marker, Region, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import MapViewDirections from "react-native-maps-directions";
 import mapStyle from "../../config/mapStyle.json";
 import { postos, Posto } from "../../data/postos";
-import FloatingButton from "../../components/ButtonPosto";
+import FloatingButton from "../../components/FloatingButton";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
 const GOOGLE_MAPS_APIKEY = "AIzaSyBp1V7-y6aMDOj2-wRBNFdjpGb47QrSjCY";
@@ -23,19 +30,21 @@ export default function MapScreen() {
   const route = useRoute();
   const params = route.params as MapRouteParams | undefined;
 
-  const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
+  const [location, setLocation] =
+    useState<Location.LocationObjectCoords | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [destino, setDestino] = useState<{ latitude: number; longitude: number; nome?: string } | null>(null);
+  const [destino, setDestino] = useState<{
+    latitude: number;
+    longitude: number;
+    nome?: string;
+  } | null>(null);
 
   const mapRef = useRef<MapView>(null);
 
-  /** Carrega destino vindo do PostoDetailsScreen */
   useEffect(() => {
     if (params?.rotaDestino) {
       setDestino(params.rotaDestino);
-
-      // Move a câmera direto para o posto
       mapRef.current?.animateToRegion(
         {
           latitude: params.rotaDestino.latitude,
@@ -48,11 +57,12 @@ export default function MapScreen() {
     }
   }, [params]);
 
-  /** Obtém localização do usuário */
   useEffect(() => {
     (async () => {
       try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
+        const { status } =
+          await Location.requestForegroundPermissionsAsync();
+
         if (status !== "granted") {
           setErrorMsg("Permissão de localização negada");
           setLoading(false);
@@ -77,7 +87,6 @@ export default function MapScreen() {
     })();
   }, []);
 
-  /** Região inicial do mapa */
   const region: Region | undefined = location
     ? {
         latitude: location.latitude,
@@ -87,7 +96,6 @@ export default function MapScreen() {
       }
     : undefined;
 
-  /** Clicar no ícone do posto */
   const handlePressPosto = (posto: Posto) => {
     setDestino({
       latitude: posto.latitude,
@@ -96,8 +104,12 @@ export default function MapScreen() {
     });
   };
 
-  /** Calcula distância entre 2 pontos (Haversine) */
-  const calcularDistancia = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const calcularDistancia = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ) => {
     const toRad = (x: number) => (x * Math.PI) / 180;
     const R = 6371;
     const dLat = toRad(lat2 - lat1);
@@ -107,12 +119,10 @@ export default function MapScreen() {
       Math.cos(toRad(lat1)) *
         Math.cos(toRad(lat2)) *
         Math.sin(dLon / 2) ** 2;
-
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
 
-  /** Encontra posto mais próximo */
   const handlePostoMaisProximo = () => {
     if (!location) return;
 
@@ -152,7 +162,6 @@ export default function MapScreen() {
     }
   };
 
-  /** Tratamento de loading e erros */
   if (loading) {
     return (
       <View style={styles.center}>
@@ -188,11 +197,13 @@ export default function MapScreen() {
         customMapStyle={mapStyle}
         initialRegion={region}
       >
-        {/* Marcadores dos postos */}
         {postos.map((posto) => (
           <Marker
             key={posto.id}
-            coordinate={{ latitude: posto.latitude, longitude: posto.longitude }}
+            coordinate={{
+              latitude: posto.latitude,
+              longitude: posto.longitude,
+            }}
             title={posto.nome}
             description={posto.endereco}
             onPress={() =>
@@ -211,7 +222,6 @@ export default function MapScreen() {
           </Marker>
         ))}
 
-        {/* Rota */}
         {destino && (
           <MapViewDirections
             origin={{
@@ -224,7 +234,12 @@ export default function MapScreen() {
             strokeColor="blue"
             onReady={(result) => {
               mapRef.current?.fitToCoordinates(result.coordinates, {
-                edgePadding: { top: 100, right: 50, bottom: 100, left: 50 },
+                edgePadding: {
+                  top: 100,
+                  right: 50,
+                  bottom: 100,
+                  left: 50,
+                },
                 animated: true,
               });
             }}
@@ -232,7 +247,9 @@ export default function MapScreen() {
         )}
       </MapView>
 
-      {/* Botão flutuante */}
+      {/* Floating button: se quiser passar onPress, dá prioridade; se não, usa navegação interna */}
+      <FloatingButton />
+
       <TouchableOpacity style={styles.button} onPress={handlePostoMaisProximo}>
         <Text style={styles.buttonText}>Posto mais próximo</Text>
       </TouchableOpacity>
@@ -244,10 +261,11 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   map: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
+
   button: {
     position: "absolute",
     bottom: 30,
-    right: 20,
+    left: 20,
     backgroundColor: "#007AFF",
     paddingVertical: 12,
     paddingHorizontal: 18,
