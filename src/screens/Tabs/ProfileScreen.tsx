@@ -104,7 +104,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
         <List.Item
           title="Acessibilidade"
-          left={(props) => <List.Icon {...props} icon="accessibility" />}
+          left={(props) => <List.Icon {...props} icon="account" />}
           right={(props) => <List.Icon {...props} icon="chevron-right" />}
         />
       </List.Section>

@@ -1,7 +1,6 @@
-// src/screens/CarInfoScreen.tsx
 import React, { useContext } from 'react';
-import { SafeAreaView, View, Text, StyleSheet } from 'react-native';
-import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { SafeAreaView, View, Text, StyleSheet, ScrollView } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { VehicleContext } from '../../context/VehicleContext';
 import { availableRangeKm } from '../../utils/vehicle';
 import ProfileSelector from './ProfileSelector';
@@ -27,55 +26,64 @@ export default function CarInfoScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Feather name="x" size={26} color="#ffffff" />
-        <View style={styles.headerRight}>
-          <Ionicons name="wifi" size={20} color="#ffffff" style={{ marginRight: 12 }} />
-          <Ionicons name="battery-half" size={22} color="#ffffff" />
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 60 }}  // 🔥 evita corte no final
+      showsVerticalScrollIndicator={false}
+    >
+      <SafeAreaView>
+
+        <View style={styles.header} />
+
+        <View style={styles.carPlaceholder}>
+          <MaterialCommunityIcons name="car-electric" size={90} color="#00eaff" />
         </View>
-      </View>
 
-      <View style={styles.carPlaceholder}>
-        <MaterialCommunityIcons name="car-electric" size={90} color="#00eaff" />
-      </View>
+        <View style={styles.centerText}>
+          <Text style={styles.modelTitle}>Tesla Model X</Text>
+          <Text style={styles.modelSub}>{autonomiaDisponivel} km • recarregue</Text>
+        </View>
 
-      <View style={styles.centerText}>
-        <Text style={styles.modelTitle}>Tesla Model X</Text>
-        <Text style={styles.modelSub}>{autonomiaDisponivel} km • recarregue</Text>
-      </View>
+        {/* INFORMAÇÕES */}
+        <View style={styles.infoContainer}>
+          <View style={styles.infoBox}>
+            <Text style={styles.infoTitle}>Bateria</Text>
+            <Text style={styles.infoSmall}>Última recarga 4 dias atrás</Text>
 
-      <View style={styles.infoContainer}>
-        <View style={styles.infoBox}>
-          <Text style={styles.infoTitle}>Bateria</Text>
-          <Text style={styles.infoSmall}>Última recarga 4 dias atrás</Text>
+            <View style={styles.batteryRow}>
+              <View style={styles.batteryBar}>
+                <View style={[styles.batteryLevel, batteryLevelStyle]} />
+              </View>
 
-          <View style={styles.batteryRow}>
-            <View style={styles.batteryBar}>
-              <View style={[styles.batteryLevel, batteryLevelStyle]} />
+              <View>
+                <Text style={styles.kmText}>{kmText}</Text>
+                <Text style={styles.percentText}>{percentText}</Text>
+              </View>
             </View>
+          </View>
 
-            <View>
-              <Text style={styles.kmText}>{kmText}</Text>
-              <Text style={styles.percentText}>{percentText}</Text>
+          <View style={styles.infoBox}>
+            <Text style={styles.infoTitle}>Clima</Text>
+            <Text style={styles.infoSmall}>Interior 22°</Text>
+
+            <View style={styles.climateCircle}>
+              <Text style={styles.climateValue}>18°</Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.infoBox}>
-          <Text style={styles.infoTitle}>Clima</Text>
-          <Text style={styles.infoSmall}>Interior 22°</Text>
-
-          <View style={styles.climateCircle}>
-            <Text style={styles.climateValue}>18°</Text>
-          </View>
+        {/* SELETOR */}
+        <View style={{ marginTop: 18 }}>
+          <ProfileSelector 
+            onChange={(p, s) => { 
+              setProfile(p); 
+              setSoc(s); 
+            }} 
+          />
         </View>
-      </View>
 
-      <View style={{ marginTop: 18 }}>
-        <ProfileSelector onChange={(p, s) => { setProfile(p); setSoc(s); }} />
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ScrollView>
   );
 }
 
@@ -87,7 +95,6 @@ const styles = StyleSheet.create({
     paddingTop: 45,
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  headerRight: { flexDirection: 'row', alignItems: 'center' },
   carPlaceholder: {
     width: '100%',
     height: 180,
