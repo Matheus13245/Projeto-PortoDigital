@@ -1,17 +1,20 @@
+// App.tsx
 import "react-native-gesture-handler";
 import React from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { PaperProvider } from "react-native-paper";
 import RootNavigator from "./navigation/RootNavigator";
 import { AuthProvider } from "./context/AuthContext";
+import { VehicleProvider } from "./context/VehicleContext";
 
 export default function App() {
-  // Minimal: sem fonts, sem splash manual, sem persistência
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <PaperProvider>
         <AuthProvider>
-          <RootNavigator />
+          <VehicleProvider>
+            <RootNavigator />
+          </VehicleProvider>
         </AuthProvider>
       </PaperProvider>
     </GestureHandlerRootView>

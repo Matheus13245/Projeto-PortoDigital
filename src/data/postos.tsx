@@ -5,6 +5,7 @@ export interface Fila {
 }
 
 export interface Posto {
+  tags: {};
   id: number;
   nome: string;
   latitude: number;
@@ -13,9 +14,11 @@ export interface Posto {
   fila: Fila;
 }
 
+
 export const postos: Posto[] = [
   {
     id: 1,
+    tags: {},
     nome: "Posto Shell Boa Viagem",
     latitude: -8.1265,
     longitude: -34.9026,
@@ -28,6 +31,7 @@ export const postos: Posto[] = [
   },
   {
     id: 2,
+    tags: {},
     nome: "Posto Ipiranga Derby",
     latitude: -8.0581,
     longitude: -34.8967,
@@ -40,6 +44,7 @@ export const postos: Posto[] = [
   },
   {
     id: 3,
+    tags: {},
     nome: "Posto BR Pina",
     latitude: -8.0898,
     longitude: -34.8834,
@@ -52,6 +57,7 @@ export const postos: Posto[] = [
   },
   {
     id: 4,
+    tags: {},
     nome: "Shopping Patteo",
     latitude: -7.993276,
     longitude: -34.840233,
@@ -64,6 +70,7 @@ export const postos: Posto[] = [
   },
   {
     id: 5,
+    tags: {},
     nome: "Restaurante",
     latitude: -7.994901,
     longitude: -34.844004,
@@ -72,6 +79,20 @@ export const postos: Posto[] = [
       lenta: { vagas: 1, fila: 0 },
       media: { vagas: 2, fila: 1 },
       rapida: { vagas: 1, fila: 2 },
+    },
+  },
+  // Posto adicionado: propositalmente posicionado além do alcance típico a partir de Recife
+  {
+    id: 6,
+    tags: {},
+    nome: 'Posto Fortaleza',
+    latitude: -3.71722,
+    longitude: -38.5434,
+    endereco: 'Av. Beira Mar, Fortaleza - CE',
+    fila: {
+      lenta: { vagas: 2, fila: 2 },
+      media: { vagas: 1, fila: 1 },
+      rapida: { vagas: 1, fila: 0 },
     },
   },
 ];
