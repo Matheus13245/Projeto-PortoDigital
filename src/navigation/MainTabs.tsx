@@ -32,7 +32,6 @@ export default function MainTabs() {
       }}
     >
       <Tab.Screen name="CarInfo" component={CarInfoScreen} options={{ title: "Carro" }} />
-      <Tab.Screen name="Health" component={HealthScreen} options={{ title: "Telemetria" }} />
       <Tab.Screen name="Map" component={MapScreen} options={{ title: "Mapa" }} />
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: "Perfil" }} />
       <Tab.Screen name="Settings" component={SettingsScreen} options={{ title: "Configurações" }} />

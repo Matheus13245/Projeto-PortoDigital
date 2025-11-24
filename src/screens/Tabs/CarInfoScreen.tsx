@@ -9,11 +9,6 @@ export default function App() {
 
       {/* Header */}
       <View style={styles.header}>
-        <Feather name="x" size={26} color="#ffffff" />
-        <View style={styles.headerRight}>
-          <Ionicons name="wifi" size={20} color="#ffffff" />
-          <Ionicons name="battery-half" size={22} color="#ffffff" />
-        </View>
       </View>
 
       {/* Car placeholder box */}
