@@ -1,17 +1,37 @@
 import React from "react";
 import { View, Text, StyleSheet, StatusBar } from "react-native";
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useAuth } from "../../context/AuthContext";
 
-export default function App() {
+export default function CarInfoScreen() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return (
+      <View style={[styles.container, { justifyContent: "center" }]}>
+        <Text style={{ color: "#ffffff", textAlign: "center" }}>
+          Faça login para ver as informações do veículo.
+        </Text>
+      </View>
+    );
+  }
+
+  const { carro } = user;
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0f1216" />
 
       {/* Header */}
       <View style={styles.header}>
+        <Feather name="x" size={26} color="#ffffff" />
+        <View style={styles.headerRight}>
+          <Ionicons name="wifi" size={20} color="#ffffff" />
+          <Ionicons name="battery-half" size={22} color="#ffffff" />
+        </View>
       </View>
 
-      {/* Car placeholder box */}
+      {/* Ícone do carro */}
       <View style={styles.carPlaceholder}>
         <MaterialCommunityIcons
           name="car-electric"
@@ -20,10 +40,12 @@ export default function App() {
         />
       </View>
 
-      {/* Model Info */}
+      {/* Modelo e status */}
       <View style={styles.centerText}>
-        <Text style={styles.modelTitle}>Tesla Model X</Text>
-        <Text style={styles.modelSub}>200 km • recarregue</Text>
+        <Text style={styles.modelTitle}>{carro.modelo}</Text>
+        <Text style={styles.modelSub}>
+          {carro.autonomiaKm} km • {carro.status}
+        </Text>
       </View>
 
       {/* Info Boxes */}
@@ -39,8 +61,10 @@ export default function App() {
             </View>
 
             <View>
-              <Text style={styles.kmText}>212 km</Text>
-              <Text style={styles.percentText}>85% • 117 kW</Text>
+              <Text style={styles.kmText}>{carro.autonomiaKm} km</Text>
+              <Text style={styles.percentText}>
+                {carro.bateriaPercent}% • elétrico
+              </Text>
             </View>
           </View>
         </View>
@@ -55,7 +79,6 @@ export default function App() {
           </View>
         </View>
       </View>
-
     </View>
   );
 }
@@ -66,81 +89,69 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#0f1216",
-    padding: 20,
-    paddingTop: 45,
+    paddingTop: 40,
+    paddingHorizontal: 20,
   },
-
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 20,
   },
-
   headerRight: {
     flexDirection: "row",
-    gap: 12,
+    gap: 10,
     alignItems: "center",
   },
-
   carPlaceholder: {
     width: "100%",
     height: 180,
-    backgroundColor: "#1a1f25",
-    borderRadius: 18,
-    marginTop: 16,
-    justifyContent: "center",
+    borderRadius: 20,
+    backgroundColor: "#161b22",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#00eaff33",
+    justifyContent: "center",
+    marginBottom: 20,
   },
-
   centerText: {
     alignItems: "center",
-    marginTop: 15,
+    marginBottom: 24,
   },
-
   modelTitle: {
-    color: "#fff",
+    color: "#ffffff",
     fontSize: 22,
-    fontWeight: "600",
+    fontWeight: "700",
   },
-
   modelSub: {
     color: "#9ca3af",
-    marginTop: 3,
+    fontSize: 14,
+    marginTop: 4,
   },
-
   infoContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 25,
+    gap: 16,
   },
-
   infoBox: {
-    width: "47%",
-    padding: 18,
-    backgroundColor: "#171c22",
-    borderRadius: 18,
+    flex: 1,
+    backgroundColor: "#161b22",
+    borderRadius: 20,
+    padding: 16,
   },
-
   infoTitle: {
-    color: "#fff",
-    fontSize: 15,
+    color: "#ffffff",
+    fontSize: 16,
     fontWeight: "600",
   },
-
   infoSmall: {
-    color: "#7d7d7d",
+    color: "#9ca3af",
     fontSize: 12,
+    marginTop: 4,
     marginBottom: 12,
   },
-
   batteryRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
   },
-
   batteryBar: {
     width: 26,
     height: 60,
@@ -149,60 +160,35 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     padding: 2,
   },
-
   batteryLevel: {
     width: "100%",
     height: "80%",
     backgroundColor: "#4dff4d",
     borderRadius: 6,
   },
-
   kmText: {
-    color: "#fff",
+    color: "#ffffff",
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  percentText: {
+    color: "#9ca3af",
+    fontSize: 12,
+  },
+  climateCircle: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    borderWidth: 4,
+    borderColor: "#00eaff",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 8,
+  },
+  climateValue: {
+    color: "#ffffff",
     fontSize: 20,
     fontWeight: "700",
   },
-
-  percentText: {
-    color: "#aaa",
-    fontSize: 12,
-  },
-
-  climateCircle: {
-    width: 74,
-    height: 74,
-    backgroundColor: "#1d242b",
-    borderRadius: 50,
-    borderWidth: 5,
-    borderColor: "#00eaff55",
-    justifyContent: "center",
-    alignItems: "center",
-    alignSelf: "center",
-    marginTop: 10,
-  },
-
-  climateValue: {
-    color: "#00d4ff",
-    fontSize: 21,
-    fontWeight: "700",
-  },
-
-  bottomMenu: {
-    position: "absolute",
-    bottom: 22,
-    left: 0,
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingHorizontal: 40,
-  },
-
-  menuCenterBtn: {
-    width: 65,
-    height: 65,
-    backgroundColor: "#00d4ff",
-    borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
-  },
 });
+
