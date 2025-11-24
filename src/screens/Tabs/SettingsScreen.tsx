@@ -1,8 +1,24 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
 import { Feather as Icon } from "@expo/vector-icons";
 
+// Ajuste esse tipo para seu RootNavigator
+type RootStackParamList = {
+  Start: undefined;
+  Settings: undefined;
+};
+
+type NavigationProps = NativeStackNavigationProp<RootStackParamList, "Settings">;
+
 export default function SettingsScreen() {
+  const navigation = useNavigation<NavigationProps>();
+
+  const handleLogout = () => {
+    navigation.navigate("Start");
+  };
+
   return (
     <View style={styles.container}>
       
@@ -12,7 +28,7 @@ export default function SettingsScreen() {
         <Text style={styles.headerText}>Configurações</Text>
       </View>
 
-      {/* Lista de opções */}
+      {/* Lista */}
       <ScrollView style={styles.optionsContainer}>
         <TouchableOpacity style={styles.option}>
           <Icon name="sun" size={20} color="white" />
@@ -25,8 +41,8 @@ export default function SettingsScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.option}>
-          <Icon name="user" size={20} color="white" />
-          <Text style={styles.optionText}>Acessibilidade</Text>
+           <Icon name="user" size={20} color="white" />
+            <Text style={styles.optionText}>Acessibilidade</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.option}>
@@ -39,7 +55,8 @@ export default function SettingsScreen() {
           <Text style={styles.optionText}>Ajuda</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.option}>
+        {/* Botão de Sair funcional */}
+        <TouchableOpacity style={styles.option} onPress={handleLogout}>
           <Icon name="log-out" size={20} color="white" />
           <Text style={styles.optionText}>Sair</Text>
         </TouchableOpacity>
