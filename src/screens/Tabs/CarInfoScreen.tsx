@@ -67,23 +67,20 @@ export default function CarInfoScreen() {
               </Text>
             </View>
           </View>
-        </View>
 
-        {/* Clima */}
-        <View style={styles.infoBox}>
-          <Text style={styles.infoTitle}>Clima</Text>
-          <Text style={styles.infoSmall}>Interior 22°</Text>
+          <View style={styles.infoBox}>
+            <Text style={styles.infoTitle}>Clima</Text>
+            <Text style={styles.infoSmall}>Interior 22°</Text>
 
-          <View style={styles.climateCircle}>
-            <Text style={styles.climateValue}>18°</Text>
+            <View style={styles.climateCircle}>
+              <Text style={styles.climateValue}>18°</Text>
+            </View>
           </View>
         </View>
       </View>
     </View>
   );
 }
-
-/* ------------------------ STYLES ------------------------ */
 
 const styles = StyleSheet.create({
   container: {
@@ -104,7 +101,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   carPlaceholder: {
-    width: "100%",
+    width: '100%',
     height: 180,
     borderRadius: 20,
     backgroundColor: "#161b22",

@@ -4,7 +4,6 @@ import { Text } from "react-native-paper";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import CarInfoScreen from "../screens/Tabs/CarInfoScreen";
-import HealthScreen from "../screens/Tabs/HealthScreen";
 import MapScreen from "../screens/Tabs/MapScreen";
 import ProfileScreen from "../screens/Tabs/ProfileScreen";
 import SettingsScreen from "../screens/Tabs/SettingsScreen";
@@ -13,7 +12,6 @@ import SettingsScreen from "../screens/Tabs/SettingsScreen";
 
 export type TabParamList = {
   CarInfo: undefined;
-  Health: undefined;
   Map: undefined;
   Profile: undefined;
   Settings: undefined;
