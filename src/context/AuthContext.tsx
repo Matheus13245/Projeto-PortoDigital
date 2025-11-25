@@ -1,6 +1,12 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
 
-type User = { id: string; name?: string; email: string };
+type User = {
+  carro: any;
+  location: any;
+  id: string;
+  name?: string;
+  email: string;
+};
 
 type AuthContextType = {
   user: User | null;
@@ -12,7 +18,7 @@ type AuthContextType = {
 // Dois usuários fixos (mock)
 const FIXED_USERS = [
   { id: "u1", name: "Alice", email: "alice@ev.com", password: "123456" },
-  { id: "u2", name: "Bob",   email: "bob@ev.com",   password: "654321" },
+  { id: "u2", name: "Bob", email: "bob@ev.com", password: "654321" },
 ];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,14 +27,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   const signIn = async (email: string, password: string) => {
-    const found = FIXED_USERS.find(u => u.email === email && u.password === password);
+    const found = FIXED_USERS.find(
+      (u) => u.email === email && u.password === password
+    );
     if (!found) throw new Error("Credenciais inválidas.");
-    setUser({ id: found.id, name: found.name, email: found.email });
+    setUser({ id: found.id, name: found.name, email: found.email, carro: null, location: null });
   };
 
   // Cadastro “fake”: não salva, apenas entra
   const signUp = async (name: string, email: string, _password: string) => {
-    setUser({ id: "temp", name, email });
+    setUser({ id: "temp", name, email, carro: null, location: null });
   };
 
   const signOut = async () => setUser(null);

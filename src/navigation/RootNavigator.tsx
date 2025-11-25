@@ -58,6 +58,7 @@ export default function RootNavigator() {
           component={MainTabs}
           options={{ headerShown: false }}
         />
+        
         <Stack.Screen
           name="PostoDetails"
           component={PostoDetailsScreen}
