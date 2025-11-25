@@ -5,7 +5,20 @@ import React, {
   useState,
 } from "react";
 
-type User = { id: string; name?: string; email: string };
+export type CarInfo = {
+  modelo: string;
+  autonomiaKm: number;
+  bateriaPercent: number;
+  status: string;
+};
+
+export type User = {
+  location?: any;
+  id: string;
+  name?: string;
+  email: string;
+  carro: CarInfo;
+};
 
 type AuthContextType = {
   user: User | null;
@@ -14,10 +27,52 @@ type AuthContextType = {
   signOut: () => Promise<void>;
 };
 
-// Dois usuários fixos (mock)
-const FIXED_USERS = [
-  { id: "u1", name: "Alice", email: "alice@ev.com", password: "123456" },
-  { id: "u2", name: "Bob",   email: "bob@ev.com",   password: "654321" },
+// 🔥 Usuários mockados (advogado, estudante, motorista de app)
+type InternalUser = {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  carro: CarInfo;
+};
+
+const FIXED_USERS: InternalUser[] = [
+  {
+    id: "u1",
+    name: "Dr. Rafael Andrade",
+    email: "advogado@ax.com",
+    password: "123456",
+    carro: {
+      modelo: "Tesla Model S Long Range",
+      autonomiaKm: 420,
+      bateriaPercent: 82,
+      status: "Autonomia confortável para o dia de trabalho.",
+    },
+  },
+  {
+    id: "u2",
+    name: "Marina Castro",
+    email: "estudante@ax.com",
+    password: "123456",
+    carro: {
+      modelo: "BYD Dolphin",
+      autonomiaKm: 310,
+      bateriaPercent: 64,
+      status: "Modo economia ativado para rotinas campus–casa.",
+    },
+  },
+  {
+    id: "u3",
+    name: "João Silva",
+    email: "app@ax.com",
+    password: "123456",
+    carro: {
+      modelo: "Nissan Leaf Pro",
+      autonomiaKm: 190,
+      bateriaPercent: 37,
+      status: "Recomendado planejar recarga antes do próximo pico.",
+    },
+  },
 ];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,14 +81,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   const signIn = async (email: string, password: string) => {
-    const found = FIXED_USERS.find(u => u.email === email && u.password === password);
-    if (!found) throw new Error("Credenciais inválidas.");
-    setUser({ id: found.id, name: found.name, email: found.email });
+    const found = FIXED_USERS.find(
+      (u) =>
+        u.email.toLowerCase() === email.toLowerCase() &&
+        u.password === password
+    );
+
+    if (!found) {
+      throw new Error("Credenciais inválidas.");
+    }
+
+    const { password: _pw, ...userWithoutPassword } = found;
+    setUser(userWithoutPassword);
   };
 
-  // Cadastro “fake”: não salva, apenas entra
-  const signUp = async (name: string, email: string, _password: string) => {
-    setUser({ id: "temp", name, email });
+  // cadastro fake: cria um usuário genérico com um carro padrão
+  const signUp = async (name: string, email: string, password: string) => {
+    const newUser: InternalUser = {
+      id: `u${FIXED_USERS.length + 1}`,
+      name,
+      email,
+      password,
+      carro: {
+        modelo: "Compacto EV Padrão",
+        autonomiaKm: 250,
+        bateriaPercent: 100,
+        status: "Perfil genérico cadastrado.",
+      },
+    };
+
+    FIXED_USERS.push(newUser);
+    const { password: _pw, ...userWithoutPassword } = newUser;
+    setUser(userWithoutPassword);
   };
 
   const signOut = async () => setUser(null);

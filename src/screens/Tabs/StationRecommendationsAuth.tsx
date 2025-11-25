@@ -19,15 +19,19 @@ export default function StationRecommendationsAuth() {
     );
   }
 
-  // PRIORIDADE de localização:
-  // 1) userLocation passado via route.params (MapScreen)
-  // 2) user.location (AuthContext mock)
-  // 3) fallback fixo (para debug)
   const userLocation = routeParams.userLocation ?? user.location ?? { latitude: -7.9367, longitude: -34.8708 };
 
-  // recompute recomendações quando user/userLocation mudarem
+  // fallback seguro caso user.carro seja undefined
+  const fallbackCar = {
+    modelo: 'Veículo padrão',
+    bateriaPercent: user.carro?.bateriaPercent ?? 50,
+    batteryKwh: user.carro?.bateriaPercent ?? 60,
+    range_km: user.carro?.autonomiaKm ?? 200,
+  };
+
   const rec = useMemo(() => {
-    return recommendStationsForAuthUser(user.carro, userLocation, postos, {
+    const car = user.carro ?? fallbackCar;
+    return recommendStationsForAuthUser(car, userLocation, postos, {
       consumptionKwhPerKm: 0.18,
       avgServiceMinutes: 30,
       travelSpeedKmh: 70,
