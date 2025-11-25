@@ -1,123 +1,184 @@
-import React, { useContext } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, ScrollView } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { VehicleContext } from '../../context/VehicleContext';
-import { availableRangeKm } from '../../utils/vehicle';
-import ProfileSelector from './ProfileSelector';
+import React from "react";
+import { View, Text, StyleSheet, StatusBar } from "react-native";
+import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useAuth } from "../../context/AuthContext";
 
 export default function CarInfoScreen() {
-  const { profile, soc, setProfile, setSoc } = useContext(VehicleContext);
+  const { user } = useAuth();
 
-  if (!profile) {
+  if (!user) {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text style={{ color: '#fff' }}>Perfil do veículo não configurado.</Text>
-      </SafeAreaView>
+      <View style={[styles.container, { justifyContent: "center" }]}>
+        <Text style={{ color: "#ffffff", textAlign: "center" }}>
+          Faça login para ver as informações do veículo.
+        </Text>
+      </View>
     );
   }
 
-  const autonomiaDisponivel = Math.round(availableRangeKm(profile, soc));
-  const kmText = `${autonomiaDisponivel} km`;
-  const percentText = `${Math.round(soc)}% • ${profile.battery_kwh} kWh`;
-
-  const batteryLevelStyle = {
-    height: `${Math.max(0, Math.min(100, soc))}%` as any,
-    backgroundColor: soc > 60 ? '#4dff4d' : soc > 25 ? '#ffdd57' : '#ff6b6b',
-  };
+  const { carro } = user;
 
   return (
-    <ScrollView 
-      style={styles.container}
-      contentContainerStyle={{ paddingBottom: 60 }}  // 🔥 evita corte no final
-      showsVerticalScrollIndicator={false}
-    >
-      <SafeAreaView>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#0f1216" />
 
-        <View style={styles.header} />
+      {/* Ícone do carro */}
+      <View style={styles.carPlaceholder}>
+        <MaterialCommunityIcons
+          name="car-electric"
+          size={90}
+          color="#00eaff"
+        />
+      </View>
 
-        <View style={styles.carPlaceholder}>
-          <MaterialCommunityIcons name="car-electric" size={90} color="#00eaff" />
-        </View>
+      {/* Modelo e status */}
+      <View style={styles.centerText}>
+        <Text style={styles.modelTitle}>{carro.modelo}</Text>
+        <Text style={styles.modelSub}>
+          {carro.autonomiaKm} km • {carro.status}
+        </Text>
+      </View>
 
-        <View style={styles.centerText}>
-          <Text style={styles.modelTitle}>Tesla Model X</Text>
-          <Text style={styles.modelSub}>{autonomiaDisponivel} km • recarregue</Text>
-        </View>
+      {/* Info Boxes */}
+      <View style={styles.infoContainer}>
+        {/* Bateria */}
+        <View style={styles.infoBox}>
+          <Text style={styles.infoTitle}>Bateria</Text>
+          <Text style={styles.infoSmall}>Última recarga 4 dias atrás</Text>
 
-        {/* INFORMAÇÕES */}
-        <View style={styles.infoContainer}>
-          <View style={styles.infoBox}>
-            <Text style={styles.infoTitle}>Bateria</Text>
-            <Text style={styles.infoSmall}>Última recarga 4 dias atrás</Text>
-
-            <View style={styles.batteryRow}>
-              <View style={styles.batteryBar}>
-                <View style={[styles.batteryLevel, batteryLevelStyle]} />
-              </View>
-
-              <View>
-                <Text style={styles.kmText}>{kmText}</Text>
-                <Text style={styles.percentText}>{percentText}</Text>
-              </View>
+          <View style={styles.batteryRow}>
+            <View style={styles.batteryBar}>
+              <View style={styles.batteryLevel} />
             </View>
-          </View>
 
-          <View style={styles.infoBox}>
-            <Text style={styles.infoTitle}>Clima</Text>
-            <Text style={styles.infoSmall}>Interior 22°</Text>
-
-            <View style={styles.climateCircle}>
-              <Text style={styles.climateValue}>18°</Text>
+            <View>
+              <Text style={styles.kmText}>{carro.autonomiaKm} km</Text>
+              <Text style={styles.percentText}>
+                {carro.bateriaPercent}% • elétrico
+              </Text>
             </View>
           </View>
         </View>
 
-        {/* SELETOR */}
-        <View style={{ marginTop: 18 }}>
-          <ProfileSelector 
-            onChange={(p, s) => { 
-              setProfile(p); 
-              setSoc(s); 
-            }} 
-          />
-        </View>
+        {/* Clima */}
+        <View style={styles.infoBox}>
+          <Text style={styles.infoTitle}>Clima</Text>
+          <Text style={styles.infoSmall}>Interior 22°</Text>
 
-      </SafeAreaView>
-    </ScrollView>
+          <View style={styles.climateCircle}>
+            <Text style={styles.climateValue}>18°</Text>
+          </View>
+        </View>
+      </View>
+    </View>
   );
 }
+
+/* ------------------------ STYLES ------------------------ */
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f1216',
-    padding: 20,
-    paddingTop: 45,
+    backgroundColor: "#0f1216",
+    paddingTop: 40,
+    paddingHorizontal: 20,
   },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  headerRight: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+  },
   carPlaceholder: {
-    width: '100%',
+    width: "100%",
     height: 180,
-    backgroundColor: '#1a1f25',
-    borderRadius: 18,
-    marginTop: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#00eaff33',
+    borderRadius: 20,
+    backgroundColor: "#161b22",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
   },
-  centerText: { alignItems: 'center', marginTop: 15 },
-  modelTitle: { color: '#fff', fontSize: 22, fontWeight: '600' },
-  modelSub: { color: '#9ca3af', marginTop: 3 },
-  infoContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 25 },
-  infoBox: { width: '47%', padding: 18, backgroundColor: '#171c22', borderRadius: 18 },
-  infoTitle: { color: '#fff', fontSize: 15, fontWeight: '600' },
-  infoSmall: { color: '#7d7d7d', fontSize: 12, marginBottom: 12 },
-  batteryRow: { flexDirection: 'row', alignItems: 'center' },
-  batteryBar: { width: 26, height: 60, borderRadius: 8, backgroundColor: '#0d4d0d', justifyContent: 'flex-end', padding: 2, marginRight: 12, overflow: 'hidden' },
-  batteryLevel: { width: '100%', borderRadius: 6 },
-  kmText: { color: '#fff', fontSize: 20, fontWeight: '700' },
-  percentText: { color: '#aaa', fontSize: 12 },
-  climateCircle: { width: 74, height: 74, backgroundColor: '#1d242b', borderRadius: 50, borderWidth: 5, borderColor: '#00eaff55', justifyContent: 'center', alignItems: 'center', alignSelf: 'center', marginTop: 10 },
-  climateValue: { color: '#00d4ff', fontSize: 21, fontWeight: '700' },
+  centerText: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  modelTitle: {
+    color: "#ffffff",
+    fontSize: 22,
+    fontWeight: "700",
+  },
+  modelSub: {
+    color: "#9ca3af",
+    fontSize: 14,
+    marginTop: 4,
+  },
+  infoContainer: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  infoBox: {
+    flex: 1,
+    backgroundColor: "#161b22",
+    borderRadius: 20,
+    padding: 16,
+  },
+  infoTitle: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  infoSmall: {
+    color: "#9ca3af",
+    fontSize: 12,
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  batteryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  batteryBar: {
+    width: 26,
+    height: 60,
+    borderRadius: 8,
+    backgroundColor: "#0d4d0d",
+    justifyContent: "flex-end",
+    padding: 2,
+  },
+  batteryLevel: {
+    width: "100%",
+    height: "80%",
+    backgroundColor: "#4dff4d",
+    borderRadius: 6,
+  },
+  kmText: {
+    color: "#ffffff",
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  percentText: {
+    color: "#9ca3af",
+    fontSize: 12,
+  },
+  climateCircle: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    borderWidth: 4,
+    borderColor: "#00eaff",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 8,
+  },
+  climateValue: {
+    color: "#ffffff",
+    fontSize: 20,
+    fontWeight: "700",
+  },
 });
