@@ -37,8 +37,11 @@ export default function MapScreen() {
   const { profile, soc } = useContext(VehicleContext);
 
   // evita cliques rápidos/duplicados em postos
-  const [processingPostoId, setProcessingPostoId] = useState<number | null>(null);
-  const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
+  const [processingPostoId, setProcessingPostoId] = useState<number | null>(
+    null
+  );
+  const [location, setLocation] =
+    useState<Location.LocationObjectCoords | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [destino, setDestino] = useState<{
@@ -48,7 +51,9 @@ export default function MapScreen() {
   } | null>(null);
 
   // waypoints (postos inseridos no roteiro)
-  const [waypoints, setWaypoints] = useState<{ latitude: number; longitude: number }[]>([]);
+  const [waypoints, setWaypoints] = useState<
+    { latitude: number; longitude: number }[]
+  >([]);
 
   const mapRef = useRef<MapView>(null);
 
@@ -70,8 +75,7 @@ export default function MapScreen() {
   useEffect(() => {
     (async () => {
       try {
-        const { status } =
-          await Location.requestForegroundPermissionsAsync();
+        const { status } = await Location.requestForegroundPermissionsAsync();
 
         if (status !== "granted") {
           setErrorMsg("Permissão de localização negada");
@@ -119,9 +123,7 @@ export default function MapScreen() {
     const dLon = toRad(lon2 - lon1);
     const a =
       Math.sin(dLat / 2) ** 2 +
-      Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) ** 2;
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
@@ -131,6 +133,23 @@ export default function MapScreen() {
       latitude: posto.latitude,
       longitude: posto.longitude,
       nome: posto.nome,
+    });
+  };
+
+  const openRecommendations = () => {
+    if (!location || !location.latitude || !location.longitude) {
+      Alert.alert(
+        "Localização indisponível",
+        "Não foi possível obter sua localização para recomendar postos."
+      );
+      return;
+    }
+
+    navigation.navigate("StationRecommendationsAuth" as any, {
+      userLocation: {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      },
     });
   };
 
@@ -198,7 +217,7 @@ export default function MapScreen() {
   }
 
   // handler chamado ao tocar no marcador de posto
-  
+
   // Handler seguro para evitar múltiplos cliques rápidos que causam crashes
   const onMarkerPressSafe = (posto: Posto) => {
     if (processingPostoId !== null) {
@@ -213,7 +232,9 @@ export default function MapScreen() {
         nome: posto.nome,
         latitude: posto.latitude,
         longitude: posto.longitude,
-        userLocation: location ? { latitude: location.latitude, longitude: location.longitude } : undefined
+        userLocation: location
+          ? { latitude: location.latitude, longitude: location.longitude }
+          : undefined,
       });
     } catch (err) {
       console.error("Erro ao navegar para PostoDetails:", err);
@@ -224,10 +245,12 @@ export default function MapScreen() {
     }
   };
 
-const onStationPress = async (posto: Posto) => {
+  const onStationPress = async (posto: Posto) => {
     try {
       const origin = { lat: location.latitude, lon: location.longitude };
-      const target = destino ? { lat: destino.latitude, lon: destino.longitude } : origin;
+      const target = destino
+        ? { lat: destino.latitude, lon: destino.longitude }
+        : origin;
 
       // simulateChargeThenReach retorna vários dados úteis
       const result = simulateChargeThenReach(
@@ -254,7 +277,9 @@ const onStationPress = async (posto: Posto) => {
 
       const message =
         `Distância até posto: ${result.distToStationKm.toFixed(1)} km\n` +
-        `Distância do posto ao destino: ${result.distStationToTargetKm.toFixed(1)} km\n` +
+        `Distância do posto ao destino: ${result.distStationToTargetKm.toFixed(
+          1
+        )} km\n` +
         `Carga necessária: ${result.kwhToAdd.toFixed(2)} kWh\n` +
         `Tempo estimado de recarga: ${minutes} min\n` +
         `Consegue continuar até o destino após carga? ${canContinueText}`;
@@ -310,17 +335,20 @@ const onStationPress = async (posto: Posto) => {
   // função para decidir cor do marcador (verde se alcançável até o posto com soc atual)
 
   // compute marker colors consistently with simulateChargeThenReach (memoized)
-  
+
   // marker color based on simple distance check to avoid calling simulateChargeThenReach during render
   const markerColorFor = (posto: Posto) => {
-    if (!location || !profile) return 'gray';
+    if (!location || !profile) return "gray";
     const origin = { lat: location.latitude, lon: location.longitude };
-    const distKm = calcularDistanciaKm(origin.lat, origin.lon, posto.latitude, posto.longitude);
+    const distKm = calcularDistanciaKm(
+      origin.lat,
+      origin.lon,
+      posto.latitude,
+      posto.longitude
+    );
     const availableKm = profile ? profile.range_km * (soc / 100) : 0;
-    return distKm <= availableKm ? 'green' : 'red';
+    return distKm <= availableKm ? "green" : "red";
   };
-
-
 
   return (
     <View style={styles.container}>
@@ -351,7 +379,11 @@ const onStationPress = async (posto: Posto) => {
             <View style={[styles.markerWrap]}>
               <Image
                 source={require("../../assets/gas-station.png")}
-                style={{ width: 35, height: 35, tintColor: markerColorFor(posto) }}
+                style={{
+                  width: 35,
+                  height: 35,
+                  tintColor: markerColorFor(posto),
+                }}
               />
             </View>
           </Marker>
@@ -387,12 +419,21 @@ const onStationPress = async (posto: Posto) => {
           />
         )}
       </MapView>
+      {/* Botão: abrir tela de recomendações */}
+      <TouchableOpacity
+        style={styles.recommendButton}
+        onPress={openRecommendations}
+        accessibilityLabel="Ver recomendações de postos"
+      >
+        <Text style={styles.recommendButtonText}>Recomendações</Text>
+      </TouchableOpacity>
 
       <FloatingButton />
 
       <TouchableOpacity style={styles.button} onPress={handlePostoMaisProximo}>
         <Text style={styles.buttonText}>Posto mais próximo</Text>
       </TouchableOpacity>
+      
     </View>
   );
 }
@@ -415,4 +456,22 @@ const styles = StyleSheet.create({
   buttonText: { color: "#fff", fontWeight: "bold" },
 
   markerWrap: { alignItems: "center", justifyContent: "center" },
+  recommendButton: {
+  position: "absolute",
+  right: 20,
+  bottom: 140,          // antes era 80 ← AGORA FICA ACIMA DO FLOATING BUTTON
+  backgroundColor: "#007AFF",
+  paddingVertical: 12,
+  paddingHorizontal: 18,
+  borderRadius: 25,
+  elevation: 4,
+  shadowColor: "#000",
+  shadowOpacity: 0.2,
+  shadowRadius: 4,
+},
+recommendButtonText: {
+  color: "#fff",
+  fontWeight: "bold",
+  fontSize: 15,
+},
 });

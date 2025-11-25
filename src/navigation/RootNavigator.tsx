@@ -1,13 +1,13 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
 import StartScreen from "../screens/Auth/StartScreen";
 import LoginScreen from "../screens/Auth/LoginScreen";
 import SignUpScreen from "../screens/Auth/SignUpScreen";
 import MainTabs from "./MainTabs";
 import PostoDetailsScreen from "../screens/Info/PostoDetailsScreen";
 import FavoritePostsScreen from "../screens/Info/FavoritePostsScreen"; // << ADICIONADO
+import StationRecommendationsAuth from "../screens/Tabs/StationRecommendationsAuth";
 
 export type RootStackParamList = {
   Start: undefined;
@@ -28,6 +28,8 @@ export type RootStackParamList = {
   };
 
   FavoritePosts: undefined; // << ADICIONADO
+
+  StationRecommendationsAuth: undefined; // << ADICIONADO
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -67,6 +69,12 @@ export default function RootNavigator() {
           name="FavoritePosts"
           component={FavoritePostsScreen}
           options={{ title: "Postos Favoritos" }}
+        />
+
+        <Stack.Screen
+          name="StationRecommendationsAuth"
+          component={StationRecommendationsAuth}
+          options={{ title: "Recomendações de Postos" }}
         />
       </Stack.Navigator>
     </NavigationContainer>
