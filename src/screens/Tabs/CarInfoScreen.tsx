@@ -1,23 +1,14 @@
 import React from "react";
 import { View, Text, StyleSheet, StatusBar } from "react-native";
-import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
 
 export default function CarInfoScreen() {
   const { user } = useAuth();
 
-  if (!user) {
+  // 1. Correção da verificação de usuário (removida a duplicação)
   if (!user) {
     return (
-      <View style={[styles.container, { justifyContent: "center" }]}>
-        <Text style={{ color: "#ffffff", textAlign: "center" }}>
-          Faça login para ver as informações do veículo.
-        </Text>
-      </View>
-    );
-  }
-
-  const { carro } = user;
       <View style={[styles.container, { justifyContent: "center" }]}>
         <Text style={{ color: "#ffffff", textAlign: "center" }}>
           Faça login para ver as informações do veículo.
@@ -41,14 +32,7 @@ export default function CarInfoScreen() {
         />
       </View>
 
-      {/* Modelo e status */}
-      <View style={styles.centerText}>
-        <Text style={styles.modelTitle}>{carro.modelo}</Text>
-        <Text style={styles.modelSub}>
-          {carro.autonomiaKm} km • {carro.status}
-        </Text>
-      </View>
-      {/* Modelo e status */}
+      {/* Modelo e status (Removida a duplicata) */}
       <View style={styles.centerText}>
         <Text style={styles.modelTitle}>{carro.modelo}</Text>
         <Text style={styles.modelSub}>
@@ -62,20 +46,11 @@ export default function CarInfoScreen() {
         <View style={styles.infoBox}>
           <Text style={styles.infoTitle}>Bateria</Text>
           <Text style={styles.infoSmall}>Última recarga 4 dias atrás</Text>
-      {/* Info Boxes */}
-      <View style={styles.infoContainer}>
-        {/* Bateria */}
-        <View style={styles.infoBox}>
-          <Text style={styles.infoTitle}>Bateria</Text>
-          <Text style={styles.infoSmall}>Última recarga 4 dias atrás</Text>
 
           <View style={styles.batteryRow}>
             <View style={styles.batteryBar}>
-              <View style={styles.batteryLevel} />
-            </View>
-          <View style={styles.batteryRow}>
-            <View style={styles.batteryBar}>
-              <View style={styles.batteryLevel} />
+              {/* Dica: Você pode usar { height: `${carro.bateriaPercent}%` } para tornar a barra dinâmica */}
+              <View style={[styles.batteryLevel, { height: `${carro.bateriaPercent}%` }]} />
             </View>
 
             <View>
@@ -109,21 +84,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#0f1216",
     paddingTop: 40,
     paddingHorizontal: 20,
-    backgroundColor: "#0f1216",
-    paddingTop: 40,
-    paddingHorizontal: 20,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  headerRight: {
-    flexDirection: "row",
-    gap: 10,
-    alignItems: "center",
-  },
+  // Removido header/headerRight pois não estavam sendo usados no JSX, 
+  // mas você pode mantê-los se planeja usar depois.
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -143,11 +106,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 20,
-    borderRadius: 20,
-    backgroundColor: "#161b22",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
   },
   centerText: {
     alignItems: "center",
@@ -199,85 +157,7 @@ const styles = StyleSheet.create({
   },
   batteryLevel: {
     width: "100%",
-    height: "80%",
-    backgroundColor: "#4dff4d",
-    borderRadius: 6,
-  },
-  kmText: {
-    color: "#ffffff",
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  percentText: {
-    color: "#9ca3af",
-    fontSize: 12,
-  },
-  climateCircle: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    borderWidth: 4,
-    borderColor: "#00eaff",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 8,
-  },
-  climateValue: {
-    color: "#ffffff",
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  centerText: {
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  modelTitle: {
-    color: "#ffffff",
-    fontSize: 22,
-    fontWeight: "700",
-  },
-  modelSub: {
-    color: "#9ca3af",
-    fontSize: 14,
-    marginTop: 4,
-  },
-  infoContainer: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  infoBox: {
-    flex: 1,
-    backgroundColor: "#161b22",
-    borderRadius: 20,
-    padding: 16,
-  },
-  infoTitle: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  infoSmall: {
-    color: "#9ca3af",
-    fontSize: 12,
-    marginTop: 4,
-    marginBottom: 12,
-  },
-  batteryRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  batteryBar: {
-    width: 26,
-    height: 60,
-    borderRadius: 8,
-    backgroundColor: "#0d4d0d",
-    justifyContent: "flex-end",
-    padding: 2,
-  },
-  batteryLevel: {
-    width: "100%",
-    height: "80%",
+    // height removido daqui e passado inline para ser dinâmico ou fixo em 80% se preferir
     backgroundColor: "#4dff4d",
     borderRadius: 6,
   },
@@ -306,4 +186,3 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 });
-
