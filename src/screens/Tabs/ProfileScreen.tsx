@@ -1,5 +1,10 @@
-import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  ImageSourcePropType,
+} from "react-native";
 import {
   Avatar,
   Text,
@@ -7,17 +12,15 @@ import {
   List,
   Button,
   Switch,
-  useTheme,
-} from 'react-native-paper';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+} from "react-native-paper";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useAuth } from "../../context/AuthContext";
 
-interface UserData {
-  nome: string;
-  email: string;
-  modeloCarro: string;
-}
+// IMPORTA OS AVATARES DAS PERSONAS
+import avatarAdvogado from "../../../assets/avatar-advogado.png";
+import avatarEstudante from "../../../assets/avatar-estudante.png";
+import avatarMotorista from "../../../assets/avatar-motorista.png";
 
-// Se você tiver o RootStackParams, use ele aqui.
 type RootStackParams = {
   Start: undefined;
   Profile: undefined;
@@ -25,58 +28,85 @@ type RootStackParams = {
 };
 
 type ProfileScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParams, 'Profile'>;
+  navigation: NativeStackNavigationProp<RootStackParams, "Profile">;
 };
 
-const USER_DATA: UserData = {
-  nome: 'Usuário Qualquerr',
-  email: 'usuario@email.com',
-  modeloCarro: 'Tesla Model X',
-};
+// Mapeia o avatar de acordo com o e-mail do usuário
+function getAvatarSource(email: string): ImageSourcePropType | null {
+  const normalized = email.toLowerCase();
+  if (normalized === "advogado@ax.com") return avatarAdvogado;
+  if (normalized === "estudante@ax.com") return avatarEstudante;
+  if (normalized === "app@ax.com") return avatarMotorista;
+  return null;
+}
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
-  const { colors } = useTheme();
-
+  const { user, signOut } = useAuth();
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(true);
 
-  const handleLogout = () => {
+  if (!user) {
+    return (
+      <View style={styles.center}>
+        <Text style={{ color: "#fff" }}>Carregando perfil...</Text>
+      </View>
+    );
+  }
+
+  const avatarLabel = user.name
+    ? user.name
+        .split(" ")
+        .slice(0, 2)
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+    : "U";
+
+  const handleLogout = async () => {
+    await signOut();
     navigation.reset({
       index: 0,
-      routes: [{ name: 'Start' }],
+      routes: [{ name: "Start" }],
     });
-
-    console.log('Usuário deslogado.');
   };
 
   const handleChangeCar = () => {
-        navigation.reset({
-      index: 0,
-      routes: [{ name: 'CarInfo' }],
-    });
-
-    console.log('Navegando para seleção de carro...');
+    navigation.navigate("CarInfo");
   };
+
+  const avatarSource = getAvatarSource(user.email);
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={styles.container}
       contentContainerStyle={styles.contentContainer}
     >
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.userName}>{USER_DATA.nome}</Text>
-        <Text style={styles.userEmail}>{USER_DATA.email}</Text>
+        {avatarSource ? (
+          <Avatar.Image source={avatarSource} size={90} style={styles.avatar} />
+        ) : (
+          <Avatar.Text label={avatarLabel} size={90} style={styles.avatar} />
+        )}
+
+        <Text style={styles.userName}>{user.name}</Text>
+        <Text style={styles.userEmail}>{user.email}</Text>
       </View>
 
+      {/* DIVIDER */}
       <Divider style={styles.divider} />
 
       {/* Veículo */}
-      <List.Section title="Veículo">
+      <List.Section title="Veículo" titleStyle={styles.sectionTitle}>
         <List.Item
           title="Modelo Atual"
-          description={USER_DATA.modeloCarro}
-          left={(props) => <List.Icon {...props} icon="car" />}
-          right={(props) => <List.Icon {...props} icon="chevron-right" />}
+          description={user.carro.modelo}
+          titleStyle={styles.listTitle}
+          descriptionStyle={styles.listDescription}
+          left={(props) => <List.Icon {...props} icon="car" color="#9ca3af" />}
+          right={(props) => (
+            <List.Icon {...props} icon="chevron-right" color="#fff" />
+          )}
+          style={styles.listItem}
           onPress={handleChangeCar}
         />
       </List.Section>
@@ -84,28 +114,41 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       <Divider style={styles.divider} />
 
       {/* Preferências */}
-      <List.Section title="Preferências">
+      <List.Section title="Preferências" titleStyle={styles.sectionTitle}>
         <List.Item
           title="Idioma"
           description="Português (Brasil)"
-          left={(props) => <List.Icon {...props} icon="web" />}
+          titleStyle={styles.listTitle}
+          descriptionStyle={styles.listDescription}
+          left={(props) => <List.Icon {...props} icon="web" color="#9ca3af" />}
+          style={styles.listItem}
         />
 
         <List.Item
           title="Notificações"
-          left={(props) => <List.Icon {...props} icon="bell" />}
+          titleStyle={styles.listTitle}
+          left={(props) => (
+            <List.Icon {...props} icon="bell" color="#9ca3af" />
+          )}
           right={() => (
             <Switch
               value={isNotificationsEnabled}
               onValueChange={setIsNotificationsEnabled}
             />
           )}
+          style={styles.listItem}
         />
 
         <List.Item
           title="Acessibilidade"
-          left={(props) => <List.Icon {...props} icon="account" />}
-          right={(props) => <List.Icon {...props} icon="chevron-right" />}
+          titleStyle={styles.listTitle}
+          left={(props) => (
+            <List.Icon {...props} icon="account" color="#9ca3af" />
+          )}
+          right={(props) => (
+            <List.Icon {...props} icon="chevron-right" color="#fff" />
+          )}
+          style={styles.listItem}
         />
       </List.Section>
 
@@ -122,48 +165,82 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         Sair
       </Button>
 
-      <Text style={styles.versionText}>Versão 1.0.0 - Squad 24 BB</Text>
+      <Text style={styles.versionText}>Versão 1.0.0 • Squad 24 BB</Text>
     </ScrollView>
   );
 };
 
+/* ---------------------------- ESTILOS ---------------------------- */
+
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: {
+    flex: 1,
+    backgroundColor: "#0f1216",
+  },
   contentContainer: {
     paddingVertical: 20,
     paddingHorizontal: 15,
   },
+  center: {
+    flex: 1,
+    backgroundColor: "#0f1216",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 20,
+  },
+  avatar: {
+    backgroundColor: "#00eaff",
   },
   userName: {
     fontSize: 22,
-    fontWeight: 'bold',
-    marginTop: 10,
-    color: '#FFFFFF',
+    fontWeight: "bold",
+    marginTop: 12,
+    color: "#ffffff",
   },
   userEmail: {
-    fontSize: 16,
-    color: '#AAAAAA',
-    marginBottom: 10,
+    fontSize: 15,
+    marginTop: 4,
+    color: "#9ca3af",
   },
   divider: {
-    marginVertical: 10,
-    backgroundColor: '#333333',
+    backgroundColor: "#23272f",
+    height: 1,
+    marginVertical: 12,
+  },
+  sectionTitle: {
+    color: "#9ca3af",
+    fontSize: 13,
+    marginBottom: 6,
+  },
+  listItem: {
+    backgroundColor: "#161b22",
+    borderRadius: 12,
+    marginBottom: 10,
+  },
+  listTitle: {
+    color: "#ffffff",
+  },
+  listDescription: {
+    color: "#9ca3af",
   },
   logoutButton: {
     marginTop: 30,
-    backgroundColor: '#E53935',
+    backgroundColor: "#d62828",
+    borderRadius: 12,
   },
   logoutButtonLabel: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
+    color: "#fff",
   },
   versionText: {
-    textAlign: 'center',
-    marginTop: 20,
+    textAlign: "center",
+    marginTop: 24,
+    marginBottom: 10,
+    color: "#6b7280",
     fontSize: 12,
-    color: '#666666',
   },
 });
 

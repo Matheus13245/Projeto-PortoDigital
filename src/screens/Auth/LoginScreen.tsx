@@ -42,48 +42,49 @@ export default function LoginScreen({ navigation }: Props) {
         <View style={styles.carGlow}>
           <Image source={loginCar} style={styles.carImage} resizeMode="contain" />
         </View>
-
-        <Text style={styles.title}>ENTRAR</Text>
+        <Text style={styles.title}>BEM VINDO</Text>
+        <Text style={styles.footerText}>Seu app de recarga otimizada</Text> 
       </View>
 
       {/* Área do formulário */}
       <View style={styles.formContainer}>
-        <TextInput
-          label="E-mail"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          mode="flat"
-          style={styles.input}
-          underlineColor="transparent"
-          theme={{
-            colors: {
-              primary: "#00f5a0",
-              background: "#262c35",
-              surfaceVariant: "#262c35",
-              onSurfaceVariant: "#ffffff",
-            },
-          }}
-        />
+  <TextInput
+  label="E-mail"
+  value={email}
+  onChangeText={setEmail}
+  mode="flat"
+  style={styles.input}
+  underlineColor="transparent"
+  textColor="#ffffff"               // 👈 força o texto digitado ser branco
+  theme={{
+    colors: {
+      primary: "#00f5a0",
+      onSurface: "#ffffff",         // 👈 cor do texto / ícone
+      placeholder: "#8e9aab",
+      background: "#262c35",
+    },
+  }}
+/>
 
-        <TextInput
-          label="Senha"
-          value={senha}
-          onChangeText={setSenha}
-          secureTextEntry
-          mode="flat"
-          style={styles.input}
-          underlineColor="transparent"
-          theme={{
-            colors: {
-              primary: "#00f5a0",
-              background: "#262c35",
-              surfaceVariant: "#262c35",
-              onSurfaceVariant: "#ffffff",
-            },
-          }}
-        />
+<TextInput
+  label="Senha"
+  value={senha}
+  onChangeText={setSenha}
+  secureTextEntry
+  mode="flat"
+  style={styles.input}
+  underlineColor="transparent"
+  textColor="#ffffff"
+  theme={{
+    colors: {
+      primary: "#00f5a0",
+      onSurface: "#ffffff",
+      placeholder: "#8e9aab",
+      background: "#262c35",
+    },
+  }}
+/>
+
 
         <Button
           mode="contained"

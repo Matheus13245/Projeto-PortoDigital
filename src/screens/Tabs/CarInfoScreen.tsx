@@ -1,16 +1,24 @@
 import React from "react";
-import { View, Text, StyleSheet, StatusBar } from "react-native";
-import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  StatusBar,
+} from "react-native";
 import { useAuth } from "../../context/AuthContext";
+
+// certifique-se de ter o arquivo: assets/car-hero.png
+import carHero from "../../../assets/car-hero.png";
 
 export default function CarInfoScreen() {
   const { user } = useAuth();
 
   if (!user) {
     return (
-      <View style={[styles.container, { justifyContent: "center" }]}>
-        <Text style={{ color: "#ffffff", textAlign: "center" }}>
-          Faça login para ver as informações do veículo.
+      <View style={[styles.container, styles.center]}>
+        <Text style={{ color: "#fff" }}>
+          Faça login para visualizar os dados do veículo.
         </Text>
       </View>
     );
@@ -18,62 +26,68 @@ export default function CarInfoScreen() {
 
   const { carro } = user;
 
+  // frase abaixo do modelo, baseada na autonomia
+  let statusLine = `${carro.autonomiaKm} km • ${carro.status}`;
+  if (!carro.status) {
+    statusLine =
+      carro.bateriaPercent < 30
+        ? `${carro.autonomiaKm} km • recarregue em breve`
+        : `${carro.autonomiaKm} km • autonomia confortável`;
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0f1216" />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <Feather name="x" size={26} color="#ffffff" />
-        <View style={styles.headerRight}>
-          <Ionicons name="wifi" size={20} color="#ffffff" />
-          <Ionicons name="battery-half" size={22} color="#ffffff" />
-        </View>
-      </View>
+      {/* HERO DO CARRO */}
+      <View style={styles.heroCard}>
+        {/* faixa diagonal branca */}
+        <View style={styles.diagonalStripe} />
 
-      {/* Ícone do carro */}
-      <View style={styles.carPlaceholder}>
-        <MaterialCommunityIcons
-          name="car-electric"
-          size={90}
-          color="#00eaff"
-        />
+        {/* imagem do carro */}
+        <Image source={carHero} style={styles.carImage} resizeMode="contain" />
       </View>
 
       {/* Modelo e status */}
-      <View style={styles.centerText}>
+      <View style={styles.modelBox}>
         <Text style={styles.modelTitle}>{carro.modelo}</Text>
-        <Text style={styles.modelSub}>
-          {carro.autonomiaKm} km • {carro.status}
-        </Text>
+        <Text style={styles.modelStatus}>{statusLine}</Text>
       </View>
 
-      {/* Info Boxes */}
-      <View style={styles.infoContainer}>
-        {/* Bateria */}
-        <View style={styles.infoBox}>
-          <Text style={styles.infoTitle}>Bateria</Text>
-          <Text style={styles.infoSmall}>Última recarga 4 dias atrás</Text>
+      {/* Seção de cards */}
+      <View style={styles.cardsRow}>
+        {/* Card BATERIA */}
+        <View style={styles.infoCard}>
+          <Text style={styles.cardTitle}>Bateria</Text>
+          <Text style={styles.cardSubtitle}>Última recarga 4 dias atrás</Text>
 
           <View style={styles.batteryRow}>
-            <View style={styles.batteryBar}>
-              <View style={styles.batteryLevel} />
+            <View style={styles.batteryBarOuter}>
+              <View
+                style={[
+                  styles.batteryBarInner,
+                  { height: `${Math.max(carro.bateriaPercent, 8)}%` },
+                ]}
+              />
             </View>
 
             <View>
-              <Text style={styles.kmText}>{carro.autonomiaKm} km</Text>
-              <Text style={styles.percentText}>
+              <Text style={styles.batteryKm}>{carro.autonomiaKm} km</Text>
+              <Text style={styles.batteryPercent}>
                 {carro.bateriaPercent}% • elétrico
               </Text>
             </View>
           </View>
+        </View>
 
-          <View style={styles.infoBox}>
-            <Text style={styles.infoTitle}>Clima</Text>
-            <Text style={styles.infoSmall}>Interior 22°</Text>
+        {/* Card CLIMA */}
+        <View style={styles.infoCard}>
+          <Text style={styles.cardTitle}>Clima</Text>
+          <Text style={styles.cardSubtitle}>Interior 22º</Text>
 
-            <View style={styles.climateCircle}>
-              <Text style={styles.climateValue}>18°</Text>
+          <View style={styles.climateCircleOuter}>
+            <View style={styles.climateCircleInner}>
+              <Text style={styles.climateTemp}>18°</Text>
             </View>
           </View>
         </View>
@@ -82,110 +96,138 @@ export default function CarInfoScreen() {
   );
 }
 
+/* ----------------- STYLES ----------------- */
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#0f1216",
-    paddingTop: 40,
     paddingHorizontal: 20,
+    paddingTop: 32,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  headerRight: {
-    flexDirection: "row",
-    gap: 10,
-    alignItems: "center",
-  },
-  carPlaceholder: {
-    width: '100%',
-    height: 180,
-    borderRadius: 20,
-    backgroundColor: "#161b22",
-    alignItems: "center",
+  center: {
     justifyContent: "center",
-    marginBottom: 20,
-  },
-  centerText: {
     alignItems: "center",
-    marginBottom: 24,
+  },
+
+  /* HERO */
+  heroCard: {
+    width: "100%",
+    height: 220,
+    borderRadius: 32,
+    backgroundColor: "#161b22",
+    overflow: "hidden",
+    marginBottom: 20,
+    justifyContent: "flex-end",
+  },
+  diagonalStripe: {
+    position: "absolute",
+    top: -80,
+    left: -40,
+    width: 260,
+    height: 160,
+    backgroundColor: "#ffffff",
+    transform: [{ rotate: "-25deg" }],
+  },
+  carImage: {
+    width: "115%",
+    height: 160,
+    alignSelf: "flex-end",
+    marginRight: -30,
+  },
+
+  modelBox: {
+    alignItems: "center",
+    marginBottom: 20,
   },
   modelTitle: {
     color: "#ffffff",
     fontSize: 22,
     fontWeight: "700",
   },
-  modelSub: {
+  modelStatus: {
     color: "#9ca3af",
-    fontSize: 14,
+    fontSize: 13,
     marginTop: 4,
   },
-  infoContainer: {
+
+  /* CARDS */
+  cardsRow: {
     flexDirection: "row",
-    gap: 16,
+    gap: 14,
   },
-  infoBox: {
+  infoCard: {
     flex: 1,
     backgroundColor: "#161b22",
     borderRadius: 20,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
-  infoTitle: {
+  cardTitle: {
     color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 14,
+    fontWeight: "700",
   },
-  infoSmall: {
+  cardSubtitle: {
     color: "#9ca3af",
-    fontSize: 12,
-    marginTop: 4,
-    marginBottom: 12,
+    fontSize: 11,
+    marginTop: 2,
+    marginBottom: 14,
   },
+
+  /* BATERIA */
   batteryRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 14,
   },
-  batteryBar: {
-    width: 26,
-    height: 60,
-    borderRadius: 8,
-    backgroundColor: "#0d4d0d",
+  batteryBarOuter: {
+    width: 30,
+    height: 70,
+    borderRadius: 10,
+    backgroundColor: "#0b2310",
+    borderWidth: 2,
+    borderColor: "#00f060",
     justifyContent: "flex-end",
-    padding: 2,
+    padding: 3,
   },
-  batteryLevel: {
+  batteryBarInner: {
     width: "100%",
-    height: "80%",
-    backgroundColor: "#4dff4d",
     borderRadius: 6,
+    backgroundColor: "#00ff5f",
   },
-  kmText: {
+  batteryKm: {
     color: "#ffffff",
     fontSize: 18,
     fontWeight: "700",
   },
-  percentText: {
+  batteryPercent: {
     color: "#9ca3af",
     fontSize: 12,
+    marginTop: 2,
   },
-  climateCircle: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+
+  /* CLIMA */
+  climateCircleOuter: {
+    width: 82,
+    height: 82,
+    borderRadius: 41,
     borderWidth: 4,
     borderColor: "#00eaff",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 8,
   },
-  climateValue: {
+  climateCircleInner: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: "#0b1117",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  climateTemp: {
     color: "#ffffff",
     fontSize: 20,
     fontWeight: "700",
   },
 });
-

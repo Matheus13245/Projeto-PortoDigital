@@ -1,16 +1,25 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useNavigation } from "@react-navigation/native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  StatusBar,
+} from "react-native";
 import { Feather as Icon } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-// Ajuste esse tipo para seu RootNavigator
 type RootStackParamList = {
   Start: undefined;
   Settings: undefined;
 };
 
-type NavigationProps = NativeStackNavigationProp<RootStackParamList, "Settings">;
+type NavigationProps = NativeStackNavigationProp<
+  RootStackParamList,
+  "Settings"
+>;
 
 export default function SettingsScreen() {
   const navigation = useNavigation<NavigationProps>();
@@ -21,82 +30,99 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
-      
-      {/* Cabeçalho */}
+      <StatusBar barStyle="light-content" backgroundColor="#0f1216" />
+
+      {/* Título */}
       <View style={styles.header}>
-        <Icon name="settings" size={30} color="white" />
-        <Text style={styles.headerText}>Configurações</Text>
+        <Text style={styles.headerTitle}>Configurações</Text>
       </View>
 
-      {/* Lista */}
-      <ScrollView style={styles.optionsContainer}>
-        <TouchableOpacity style={styles.option}>
-          <Icon name="sun" size={20} color="white" />
-          <Text style={styles.optionText}>Tema</Text>
-        </TouchableOpacity>
+      {/* Lista de opções */}
+      <ScrollView contentContainerStyle={styles.optionsWrapper}>
+        <Option icon="sun" label="Tema" />
+        <Option icon="shield" label="Segurança" />
+        <Option icon="user" label="Acessibilidade" />
+        <Option icon="globe" label="Idioma" />
+        <Option icon="help-circle" label="Ajuda" />
 
-        <TouchableOpacity style={styles.option}>
-          <Icon name="shield" size={20} color="white" />
-          <Text style={styles.optionText}>Segurança</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.option}>
-           <Icon name="user" size={20} color="white" />
-            <Text style={styles.optionText}>Acessibilidade</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.option}>
-          <Icon name="globe" size={20} color="white" />
-          <Text style={styles.optionText}>Idioma</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.option}>
-          <Icon name="help-circle" size={20} color="white" />
-          <Text style={styles.optionText}>Ajuda</Text>
-        </TouchableOpacity>
-
-        {/* Botão de Sair funcional */}
-        <TouchableOpacity style={styles.option} onPress={handleLogout}>
-          <Icon name="log-out" size={20} color="white" />
-          <Text style={styles.optionText}>Sair</Text>
+        {/* Botão de Sair */}
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Icon name="log-out" size={20} color="#fff" />
+          <Text style={styles.logoutText}>Sair</Text>
         </TouchableOpacity>
       </ScrollView>
-
     </View>
+  );
+}
+
+function Option({
+  label,
+  icon,
+}: {
+  label: string;
+  icon: React.ComponentProps<typeof Icon>["name"];
+}) {
+  return (
+    <TouchableOpacity style={styles.option}>
+      <Icon name={icon} size={22} color="#ffffff" />
+      <Text style={styles.optionText}>{label}</Text>
+      <Icon name="chevron-right" size={20} color="#6b7280" />
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1F2937",
+    backgroundColor: "#0f1216",
   },
   header: {
-    flexDirection: "row",
+    paddingVertical: 20,
+    paddingHorizontal: 20,
     alignItems: "center",
-    backgroundColor: "#222F3E",
-    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#1c2530",
   },
-  headerText: {
-    color: "white",
-    fontSize: 20,
-    marginLeft: 10,
+  headerTitle: {
+    color: "#ffffff",
+    fontSize: 22,
+    fontWeight: "800",
+    letterSpacing: 1,
   },
-  optionsContainer: {
-    marginTop: 20,
-    paddingHorizontal: 10,
+  optionsWrapper: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
+    gap: 12,
   },
   option: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#2D3A47",
-    padding: 15,
-    marginBottom: 10,
-    borderRadius: 5,
+    backgroundColor: "#141820",
+    padding: 16,
+    borderRadius: 14,
+    justifyContent: "space-between",
   },
   optionText: {
-    color: "white",
-    fontSize: 18,
-    marginLeft: 15,
+    color: "#ffffff",
+    fontSize: 16,
+    flex: 1,
+    marginLeft: 16,
+    fontWeight: "500",
+  },
+  logoutButton: {
+    marginTop: 20,
+    backgroundColor: "#E53935",
+    paddingVertical: 16,
+    borderRadius: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+  },
+  logoutText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
   },
 });

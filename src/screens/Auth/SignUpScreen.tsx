@@ -67,24 +67,24 @@ export default function SignUpScreen({ navigation }: Props) {
           }}
         />
 
-        <TextInput
-          label="E-mail"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          mode="flat"
-          style={styles.input}
-          underlineColor="transparent"
-          theme={{
-            colors: {
-              primary: "#00f5a0",
-              background: "#262c35",
-              surfaceVariant: "#262c35",
-              onSurfaceVariant: "#ffffff",
-            },
-          }}
-        />
+<TextInput
+  label="E-mail"
+  value={nome}
+  onChangeText={setNome}
+  mode="flat"
+  style={styles.input}
+   textColor="#ffffff"
+  theme={{
+    colors: {
+      primary: "#00f5a0",
+      onSurface: "#ffffff",
+      placeholder: "#8e9aab",
+      background: "#262c35",
+    },
+  }}
+/>
+
+
 
         <TextInput
           label="Senha"
