@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { useRoute, RouteProp } from "@react-navigation/native";
+import { useRoute, RouteProp, useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
 import FavoriteButton from "../../components/FavoriteButton";
 import { postos, Posto } from "../../data/postos";
 
 type PostoDetailsRouteProps = RouteProp<RootStackParamList, "PostoDetails">;
+type NavigationProps = NativeStackNavigationProp<RootStackParamList>;
 
 export default function PostoDetailsScreen() {
+  const navigation = useNavigation<NavigationProps>();
   const route = useRoute<PostoDetailsRouteProps>();
   const { id, nome, latitude, longitude } = route.params as any;
 
@@ -20,8 +23,22 @@ export default function PostoDetailsScreen() {
 
   const [calculatedTime, setCalculatedTime] = useState<number | null>(null);
 
+  // Navegar para o mapa com rota
+  const handleCriarRota = () => {
+    navigation.navigate("Main", {
+      screen: "Map",
+      params: {
+        rotaDestino: {
+          latitude,
+          longitude,
+          nome,
+        },
+      },
+    });
+  };
+
   // ============================================
-  //  CÁLCULO DO TEMPO DE ESPERA REAL
+  //  CÁLCULO DE TEMPO
   // ============================================
   useEffect(() => {
     if (!selectedCharge || !postoCompleto?.fila) {
@@ -31,18 +48,16 @@ export default function PostoDetailsScreen() {
 
     const filaInfo = postoCompleto.fila[selectedCharge];
 
-    // Tempos totais médios
     const temposTotais = {
-      lenta: 660, // 11h
-      media: 300, // 5h
-      rapida: 30, // 30min
+      lenta: 660,
+      media: 300,
+      rapida: 30,
     };
 
-    // Tempo médio restante de quem já está carregando
     const temposRestantes = {
-      lenta: 420, // 7h restantes
-      media: 180, // 3h restantes
-      rapida: 20, // 20min restantes
+      lenta: 420,
+      media: 180,
+      rapida: 20,
     };
 
     const tempoTotal = temposTotais[selectedCharge];
@@ -51,18 +66,12 @@ export default function PostoDetailsScreen() {
     const vagasTotais = filaInfo.vagas;
     const pessoasNaFila = filaInfo.fila;
 
-    // Vagas ocupadas (se existe fila, todas estão ocupadas)
     const vagasOcupadas = vagasTotais;
-    const vagasDisponiveis = Math.max(vagasTotais - vagasOcupadas, 0);
 
-    // SOMA DO TEMPO REAL:
-    // 1. Tempo restante dos que estão carregando
     const tempoOcupados = vagasOcupadas * tempoRestante;
 
-    // 2. Tempo dos que estão na fila (processando em paralelo pelas vagas)
-    const tempoFila = pessoasNaFila > 0
-      ? (pessoasNaFila / vagasTotais) * tempoTotal
-      : 0;
+    const tempoFila =
+      pessoasNaFila > 0 ? (pessoasNaFila / vagasTotais) * tempoTotal : 0;
 
     const tempoFinal = tempoOcupados + tempoFila;
 
@@ -73,7 +82,7 @@ export default function PostoDetailsScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>{nome}</Text>
 
-      {/* CARD DA FILA */}
+      {/* CARD DE FILA */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Fila de Espera</Text>
 
@@ -96,6 +105,7 @@ export default function PostoDetailsScreen() {
               <Picker.Item label="🚀 Rápida (~30 min)" value="rapida" />
             </Picker>
 
+            {/* EXIBIR RESULTADO QUANDO ESCOLHER */}
             {selectedCharge && (
               <View style={styles.infoBox}>
                 <Text style={styles.resultTitle}>
@@ -122,25 +132,35 @@ export default function PostoDetailsScreen() {
                       </Text>
 
                       <Text style={styles.resultText}>
-                        Vagas ocupadas (carregando): {vagasOcupadas}
+                        Carregando agora: {vagasOcupadas}
                       </Text>
 
                       <Text style={styles.resultText}>
-                        Pessoas esperando na fila: {pessoasNaFila}
+                        Na fila: {pessoasNaFila}
                       </Text>
 
                       <Text style={styles.resultText}>
-                        Vagas disponíveis agora: {vagasDisponiveis}
+                        Disponíveis agora: {vagasDisponiveis}
                       </Text>
 
                       <Text style={styles.resultText}>
-                        Tempo estimado até sua vez:{" "}
+                        Sua vez em:{" "}
                         {calculatedTime !== null
                           ? calculatedTime > 60
                             ? `${Math.ceil(calculatedTime / 60)}h`
                             : `${Math.ceil(calculatedTime)} min`
                           : "-"}
                       </Text>
+
+                      {/* BOTÃO ADICIONADO AQUI */}
+                      <TouchableOpacity
+                        style={styles.button}
+                        onPress={handleCriarRota}
+                      >
+                        <Text style={styles.buttonText}>
+                          Criar rota até o posto
+                        </Text>
+                      </TouchableOpacity>
                     </>
                   );
                 })()}
@@ -150,6 +170,7 @@ export default function PostoDetailsScreen() {
         )}
       </View>
 
+      {/* FAVORITAR */}
       <FavoriteButton posto={{ id, nome, latitude, longitude }} />
     </View>
   );
@@ -204,5 +225,17 @@ const styles = StyleSheet.create({
   resultText: {
     marginTop: 3,
     color: "#333",
+  },
+  button: {
+    marginTop: 15,
+    backgroundColor: "#007AFF",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
