@@ -1,10 +1,6 @@
+// src/screens/Tabs/ProfileScreen.tsx
 import React, { useState } from "react";
-import {
-  View,
-  ScrollView,
-  StyleSheet,
-  ImageSourcePropType,
-} from "react-native";
+import { View, ScrollView, ImageSourcePropType, SafeAreaView } from "react-native";
 import {
   Avatar,
   Text,
@@ -16,10 +12,11 @@ import {
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useAuth } from "../../context/AuthContext";
 
-// IMPORTA OS AVATARES DAS PERSONAS
 import avatarAdvogado from "../../../assets/avatar-advogado.png";
 import avatarEstudante from "../../../assets/avatar-estudante.png";
 import avatarMotorista from "../../../assets/avatar-motorista.png";
+
+import { styles } from "./ProfileScreen.styles";
 
 type RootStackParams = {
   Start: undefined;
@@ -47,7 +44,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   if (!user) {
     return (
       <View style={styles.center}>
-        <Text style={{ color: "#fff" }}>Carregando perfil...</Text>
+        <Text style={styles.loadingText}>Carregando perfil...</Text>
       </View>
     );
   }
@@ -76,172 +73,103 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const avatarSource = getAvatarSource(user.email);
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-    >
-      {/* Header */}
-      <View style={styles.header}>
-        {avatarSource ? (
-          <Avatar.Image source={avatarSource} size={90} style={styles.avatar} />
-        ) : (
-          <Avatar.Text label={avatarLabel} size={90} style={styles.avatar} />
-        )}
-
-        <Text style={styles.userName}>{user.name}</Text>
-        <Text style={styles.userEmail}>{user.email}</Text>
-      </View>
-
-      {/* DIVIDER */}
-      <Divider style={styles.divider} />
-
-      {/* Veículo */}
-      <List.Section title="Veículo" titleStyle={styles.sectionTitle}>
-        <List.Item
-          title="Modelo Atual"
-          description={user.carro.modelo}
-          titleStyle={styles.listTitle}
-          descriptionStyle={styles.listDescription}
-          left={(props) => <List.Icon {...props} icon="car" color="#9ca3af" />}
-          right={(props) => (
-            <List.Icon {...props} icon="chevron-right" color="#fff" />
-          )}
-          style={styles.listItem}
-          onPress={handleChangeCar}
-        />
-      </List.Section>
-
-      <Divider style={styles.divider} />
-
-      {/* Preferências */}
-      <List.Section title="Preferências" titleStyle={styles.sectionTitle}>
-        <List.Item
-          title="Idioma"
-          description="Português (Brasil)"
-          titleStyle={styles.listTitle}
-          descriptionStyle={styles.listDescription}
-          left={(props) => <List.Icon {...props} icon="web" color="#9ca3af" />}
-          style={styles.listItem}
-        />
-
-        <List.Item
-          title="Notificações"
-          titleStyle={styles.listTitle}
-          left={(props) => (
-            <List.Icon {...props} icon="bell" color="#9ca3af" />
-          )}
-          right={() => (
-            <Switch
-              value={isNotificationsEnabled}
-              onValueChange={setIsNotificationsEnabled}
-            />
-          )}
-          style={styles.listItem}
-        />
-
-        <List.Item
-          title="Acessibilidade"
-          titleStyle={styles.listTitle}
-          left={(props) => (
-            <List.Icon {...props} icon="account" color="#9ca3af" />
-          )}
-          right={(props) => (
-            <List.Icon {...props} icon="chevron-right" color="#fff" />
-          )}
-          style={styles.listItem}
-        />
-      </List.Section>
-
-      <Divider style={styles.divider} />
-
-      {/* Logout */}
-      <Button
-        mode="contained"
-        onPress={handleLogout}
-        style={styles.logoutButton}
-        labelStyle={styles.logoutButtonLabel}
-        icon="logout"
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
       >
-        Sair
-      </Button>
+        {/* HEADER */}
+        <View style={styles.header}>
+          {avatarSource ? (
+            <Avatar.Image source={avatarSource} size={90} style={styles.avatar} />
+          ) : (
+            <Avatar.Text label={avatarLabel} size={90} style={styles.avatar} />
+          )}
 
-      <Text style={styles.versionText}>Versão 1.0.0 • Squad 24 BB</Text>
-    </ScrollView>
+          <Text style={styles.userName}>{user.name}</Text>
+          <Text style={styles.userEmail}>{user.email}</Text>
+        </View>
+
+        <Divider style={styles.divider} />
+
+        {/* VEÍCULO */}
+        <List.Section title="Veículo" titleStyle={styles.sectionTitle}>
+          <List.Item
+            title="Modelo Atual"
+            description={user.carro.modelo}
+            titleStyle={styles.listTitle}
+            descriptionStyle={styles.listDescription}
+            left={(props) => (
+              <List.Icon {...props} icon="car" color="#9ca3af" />
+            )}
+            right={(props) => (
+              <List.Icon {...props} icon="chevron-right" color="#fff" />
+            )}
+            style={styles.listItem}
+            onPress={handleChangeCar}
+          />
+        </List.Section>
+
+        <Divider style={styles.divider} />
+
+        {/* PREFERÊNCIAS */}
+        <List.Section title="Preferências" titleStyle={styles.sectionTitle}>
+          <List.Item
+            title="Idioma"
+            description="Português (Brasil)"
+            titleStyle={styles.listTitle}
+            descriptionStyle={styles.listDescription}
+            left={(props) => (
+              <List.Icon {...props} icon="web" color="#9ca3af" />
+            )}
+            style={styles.listItem}
+          />
+
+          <List.Item
+            title="Notificações"
+            titleStyle={styles.listTitle}
+            left={(props) => (
+              <List.Icon {...props} icon="bell" color="#9ca3af" />
+            )}
+            right={() => (
+              <Switch
+                value={isNotificationsEnabled}
+                onValueChange={setIsNotificationsEnabled}
+              />
+            )}
+            style={styles.listItem}
+          />
+
+          <List.Item
+            title="Acessibilidade"
+            titleStyle={styles.listTitle}
+            left={(props) => (
+              <List.Icon {...props} icon="account" color="#9ca3af" />
+            )}
+            right={(props) => (
+              <List.Icon {...props} icon="chevron-right" color="#fff" />
+            )}
+            style={styles.listItem}
+          />
+        </List.Section>
+
+        <Divider style={styles.divider} />
+
+        {/* LOGOUT */}
+        <Button
+          mode="contained"
+          onPress={handleLogout}
+          style={styles.logoutButton}
+          labelStyle={styles.logoutButtonLabel}
+          icon="logout"
+        >
+          Sair
+        </Button>
+
+        <Text style={styles.versionText}>Versão 1.0.0 • Squad 24 BB</Text>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
-
-/* ---------------------------- ESTILOS ---------------------------- */
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0f1216",
-  },
-  contentContainer: {
-    paddingVertical: 20,
-    paddingHorizontal: 15,
-  },
-  center: {
-    flex: 1,
-    backgroundColor: "#0f1216",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  avatar: {
-    backgroundColor: "#00eaff",
-  },
-  userName: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginTop: 12,
-    color: "#ffffff",
-  },
-  userEmail: {
-    fontSize: 15,
-    marginTop: 4,
-    color: "#9ca3af",
-  },
-  divider: {
-    backgroundColor: "#23272f",
-    height: 1,
-    marginVertical: 12,
-  },
-  sectionTitle: {
-    color: "#9ca3af",
-    fontSize: 13,
-    marginBottom: 6,
-  },
-  listItem: {
-    backgroundColor: "#161b22",
-    borderRadius: 12,
-    marginBottom: 10,
-  },
-  listTitle: {
-    color: "#ffffff",
-  },
-  listDescription: {
-    color: "#9ca3af",
-  },
-  logoutButton: {
-    marginTop: 30,
-    backgroundColor: "#d62828",
-    borderRadius: 12,
-  },
-  logoutButtonLabel: {
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  versionText: {
-    textAlign: "center",
-    marginTop: 24,
-    marginBottom: 10,
-    color: "#6b7280",
-    fontSize: 12,
-  },
-});
 
 export default ProfileScreen;

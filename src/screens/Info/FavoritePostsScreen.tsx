@@ -1,13 +1,10 @@
+// src/screens/Info/FavoritePostsScreen.tsx
 import React, { useCallback, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  FlatList,
-  StyleSheet,
-} from "react-native";
+import { View, Text, TouchableOpacity, FlatList } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationProp, useFocusEffect } from "@react-navigation/native";
+
+import { styles } from "./FavoritePostsScreen.styles";
 
 interface Props {
   navigation: NavigationProp<any>;
@@ -25,8 +22,11 @@ export default function FavoritePostsScreen({ navigation }: Props) {
 
   const loadFavoritos = async () => {
     const data = await AsyncStorage.getItem("@postos_favoritos");
-    console.log("DATA LIDA:", data);
-    if (data) setFavoritos(JSON.parse(data));
+    if (data) {
+      setFavoritos(JSON.parse(data));
+    } else {
+      setFavoritos([]);
+    }
   };
 
   useFocusEffect(
@@ -49,34 +49,28 @@ export default function FavoritePostsScreen({ navigation }: Props) {
       <Text style={styles.title}>Postos Favoritos</Text>
 
       {favoritos.length === 0 && (
-        <Text style={{ marginTop: 10 }}>Nenhum posto favoritado ainda.</Text>
+        <Text style={styles.emptyText}>Nenhum posto favoritado ainda.</Text>
       )}
 
       <FlatList
         data={favoritos}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.item} onPress={() => handleSelect(item)}>
-            <Text>{item.nome}</Text>
+          <TouchableOpacity
+            style={styles.item}
+            onPress={() => handleSelect(item)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.itemTitle}>{item.nome}</Text>
+            <Text style={styles.itemSubtitle}>
+              {`Lat: ${item.latitude.toFixed(4)} • Long: ${item.longitude.toFixed(
+                4
+              )}`}
+            </Text>
           </TouchableOpacity>
         )}
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-  },
-  item: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderColor: "#ddd",
-  },
-});

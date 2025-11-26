@@ -35,39 +35,26 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function RootNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Start">
-        <Stack.Screen
-          name="Start"
-          component={StartScreen}
-          options={{ title: "Bem-vindo" }}
-        />
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{ title: "Entrar" }}
-        />
-        <Stack.Screen
-          name="SignUp"
-          component={SignUpScreen}
-          options={{ title: "Criar conta" }}
-        />
-        <Stack.Screen
-          name="Main"
-          component={MainTabs}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="PostoDetails"
-          component={PostoDetailsScreen}
-          options={{ title: "Detalhes do Posto" }}
-        />
-
-        {/* NOVA TELA PARA FAVORITOS */}
-        <Stack.Screen
-          name="FavoritePosts"
-          component={FavoritePostsScreen}
-          options={{ title: "Postos Favoritos" }}
-        />
+      <Stack.Navigator 
+       initialRouteName="Start"
+  screenOptions={{
+    headerShown: false,
+  }}
+>
+  <Stack.Screen name="Start" component={StartScreen} />
+  <Stack.Screen name="Login" component={LoginScreen} />
+  <Stack.Screen name="SignUp" component={SignUpScreen} />
+  <Stack.Screen name="Main" component={MainTabs} />
+  <Stack.Screen
+    name="PostoDetails"
+    component={PostoDetailsScreen}
+    options={{ headerShown: false }} // reforço
+  />
+  <Stack.Screen
+    name="FavoritePosts"
+    component={FavoritePostsScreen}
+    options={{ headerShown: false }} // se precisar
+  />
       </Stack.Navigator>
     </NavigationContainer>
   );
