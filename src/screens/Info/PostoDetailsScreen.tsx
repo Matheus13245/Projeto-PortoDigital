@@ -1,11 +1,6 @@
 // src/screens/Info/PostoDetailsScreen.tsx
 import React, { useEffect, useState } from "react";
-import {
-  SafeAreaView,
-  View,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { SafeAreaView, View, Text, TouchableOpacity } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import {
   useRoute,
@@ -18,6 +13,7 @@ import { RootStackParamList } from "../../navigation/RootNavigator";
 import FavoriteButton from "../../components/FavoriteButton";
 import { postos, Posto } from "../../data/postos";
 import { styles } from "./PostoDetailsScreen.styles";
+import { COLORS } from "../../styles/theme"; // ✅ importa cores
 
 type PostoDetailsRouteProps = RouteProp<RootStackParamList, "PostoDetails">;
 type NavigationProps = NativeStackNavigationProp<RootStackParamList>;
@@ -113,12 +109,28 @@ export default function PostoDetailsScreen() {
                     )
                   }
                   style={styles.picker}
-                  dropdownIconColor="#E5E7EB"
+                  dropdownIconColor={COLORS.textPrimary} // ✅ ícone claro
                 >
-                  <Picker.Item label="Escolher..." value={null} />
-                  <Picker.Item label="🔋 Lenta (10–12h)" value="lenta" />
-                  <Picker.Item label="⚡ Média (4–6h)" value="media" />
-                  <Picker.Item label="🚀 Rápida (~30 min)" value="rapida" />
+                  <Picker.Item
+                    label="Escolher..."
+                    value={null}
+                    color={COLORS.textSecondary} // cinza
+                  />
+                  <Picker.Item
+                    label="🔋 Lenta (10–12h)"
+                    value="lenta"
+                    color={COLORS.textPrimary} // branco
+                  />
+                  <Picker.Item
+                    label="⚡ Média (4–6h)"
+                    value="media"
+                    color={COLORS.textPrimary}
+                  />
+                  <Picker.Item
+                    label="🚀 Rápida (~30 min)"
+                    value="rapida"
+                    color={COLORS.textPrimary}
+                  />
                 </Picker>
               </View>
 
@@ -185,7 +197,7 @@ export default function PostoDetailsScreen() {
           )}
         </View>
 
-        {/* FAVORITAR – o componente será estilizado em verde no próprio FavoriteButton */}
+        {/* FAVORITAR */}
         <FavoriteButton posto={{ id, nome, latitude, longitude }} />
       </View>
     </SafeAreaView>

@@ -1,3 +1,4 @@
+// src/components/FavoriteButton.tsx
 import React, { useState, useEffect } from "react";
 import {
   TouchableOpacity,
@@ -23,19 +24,22 @@ export default function FavoriteButton({ posto }: FavoriteButtonProps) {
   const [loading, setLoading] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  // Verifica favoritos salvos
+  // Verifica se o posto já está salvo nos favoritos
   const checkIfFavorite = async () => {
-    const stored = await AsyncStorage.getItem("@postos_favoritos");
-    const lista: FavoritePosto[] = stored ? JSON.parse(stored) : [];
-
-    setIsFavorite(lista.some((p) => p.id === posto.id));
+    try {
+      const stored = await AsyncStorage.getItem("@postos_favoritos");
+      const lista: FavoritePosto[] = stored ? JSON.parse(stored) : [];
+      setIsFavorite(lista.some((p) => p.id === posto.id));
+    } catch (err) {
+      console.log("Erro ao ler favoritos:", err);
+    }
   };
 
   useEffect(() => {
     checkIfFavorite();
   }, []);
 
-  // Alterna o favorito
+  // Alterna favorito
   const toggleFavorite = async () => {
     try {
       setLoading(true);
@@ -46,8 +50,10 @@ export default function FavoriteButton({ posto }: FavoriteButtonProps) {
       let updatedList: FavoritePosto[];
 
       if (isFavorite) {
+        // Remover
         updatedList = lista.filter((p) => p.id !== posto.id);
       } else {
+        // Adicionar
         updatedList = [...lista, posto];
       }
 
@@ -67,19 +73,21 @@ export default function FavoriteButton({ posto }: FavoriteButtonProps) {
   return (
     <TouchableOpacity
       style={[
-        styles.button,
+        styles.buttonBase,
         isFavorite ? styles.buttonFavorited : styles.buttonAdd,
       ]}
       onPress={toggleFavorite}
       disabled={loading}
-      activeOpacity={0.8}
+      activeOpacity={0.85}
     >
       {loading ? (
-        <ActivityIndicator color={COLORS.primaryButtonLabel} />
+        <ActivityIndicator
+          color={isFavorite ? COLORS.primaryButton : COLORS.primaryButtonLabel}
+        />
       ) : (
         <Text
           style={[
-            styles.text,
+            styles.textBase,
             isFavorite ? styles.textFavorited : styles.textAdd,
           ]}
         >
@@ -91,24 +99,22 @@ export default function FavoriteButton({ posto }: FavoriteButtonProps) {
 }
 
 const styles = StyleSheet.create({
-  button: {
+  buttonBase: {
     marginTop: 20,
     paddingVertical: 14,
     borderRadius: 999,
     alignItems: "center",
   },
 
-  // Adicionar aos favoritos → botão verde sólido
+  // Estado "Adicionar aos favoritos" → botão verde sólido
   buttonAdd: {
-    backgroundColor: COLORS.primaryButton,
+    backgroundColor: COLORS.primaryButton, // verde AX
   },
   textAdd: {
-    color: COLORS.primaryButtonLabel,
-    fontWeight: "700",
-    fontSize: 15,
+    color: COLORS.primaryButtonLabel, // verde-escuro do tema
   },
 
-  // Remover favoritos → botão com borda verde e fundo transparente
+  // Estado "Remover dos favoritos" → borda verde, fundo transparente
   buttonFavorited: {
     backgroundColor: "transparent",
     borderWidth: 2,
@@ -116,11 +122,10 @@ const styles = StyleSheet.create({
   },
   textFavorited: {
     color: COLORS.primaryButton,
-    fontWeight: "700",
-    fontSize: 15,
   },
 
-  text: {
-    fontWeight: "bold",
+  textBase: {
+    fontWeight: "700",
+    fontSize: 15,
   },
 });

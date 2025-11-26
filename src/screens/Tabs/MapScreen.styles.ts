@@ -31,19 +31,20 @@ export const styles = StyleSheet.create({
 
   // Botão "Posto mais próximo" – verde AX, acima da estrela
   nearestButton: {
-    position: "absolute",
-    left: 24,
-    right: 24,
-    bottom: 96, // sobe para não ficar em cima da estrela/floating
-    backgroundColor: COLORS.primaryButton,
-    paddingVertical: 14,
-    borderRadius: 999,
-    alignItems: "center",
-    elevation: 4,
-  },
-  nearestButtonText: {
-    color: COLORS.primaryButtonLabel,
-    fontWeight: "700",
-    fontSize: 15,
+ position: "absolute",
+  left: 24,
+  right: 24,
+  bottom: 120,          
+  backgroundColor: COLORS.primaryButton,
+  paddingVertical: 14,
+  borderRadius: 999,
+  alignItems: "center",
+  justifyContent: "center",
+  elevation: 6,
+},
+buttonText: {
+  color: COLORS.primaryButtonLabel,
+  fontWeight: "700",
+  fontSize: 16,
   },
 });

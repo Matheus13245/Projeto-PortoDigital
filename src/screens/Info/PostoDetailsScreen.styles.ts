@@ -56,7 +56,7 @@ export const styles = StyleSheet.create({
 
   picker: {
     color: COLORS.textPrimary,
-    backgroundColor: COLORS.cardBackground,
+    backgroundColor: "transparent",
   },
 
   infoBox: {

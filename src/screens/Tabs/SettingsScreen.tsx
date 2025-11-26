@@ -1,65 +1,86 @@
-// src/screens/Tabs/SettingsScreen.styles.ts
-import { StyleSheet } from "react-native";
-import { COLORS } from "../../styles/theme";
+// src/screens/Tabs/SettingsScreen.tsx
+import React, { useState } from "react";
+import {
+  SafeAreaView,
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StatusBar,
+  Switch,
+} from "react-native";
+import { Feather as Icon } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-export const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.solidBackground, // #22252D
-  },
+import { styles } from "./SettingsScreen.styles";
 
-  header: {
-    paddingVertical: 20,
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#2A2E36",
-  },
+type RootStackParamList = {
+  Start: undefined;
+  Settings: undefined;
+};
 
-  headerTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 22,
-    fontWeight: "800",
-    letterSpacing: 1,
-  },
+type NavigationProps = NativeStackNavigationProp<
+  RootStackParamList,
+  "Settings"
+>;
 
-  optionsWrapper: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 40,
-    gap: 14,
-  },
+export default function SettingsScreen() {
+  const navigation = useNavigation<NavigationProps>();
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
-  option: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: COLORS.cardBackground, // #1B1E24
-    padding: 16,
-    borderRadius: 14,
-    justifyContent: "space-between",
-  },
+  const handleLogout = () => {
+    navigation.navigate("Start");
+  };
 
-  optionText: {
-    flex: 1,
-    marginLeft: 16,
-    fontSize: 16,
-    color: COLORS.textPrimary,
-    fontWeight: "500",
-  },
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" />
 
-  logoutButton: {
-    marginTop: 20,
-    backgroundColor: "#E53935",
-    paddingVertical: 16,
-    borderRadius: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-  },
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Configurações</Text>
+      </View>
 
-  logoutText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-});
+      <ScrollView contentContainerStyle={styles.optionsWrapper}>
+        {/* Opções "estáticas" */}
+        <Option icon="sun" label="Tema" />
+        <Option icon="shield" label="Segurança" />
+        <Option icon="user" label="Acessibilidade" />
+        <Option icon="globe" label="Idioma" />
+        <Option icon="help-circle" label="Ajuda" />
+
+        {/* Notificações com switch */}
+        <View style={styles.option}>
+          <Icon name="bell" size={22} color="#ffffff" />
+          <Text style={styles.optionText}>Notificações</Text>
+          <Switch
+            value={notificationsEnabled}
+            onValueChange={setNotificationsEnabled}
+          />
+        </View>
+
+        {/* Botão de sair */}
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Icon name="log-out" size={20} color="#fff" />
+          <Text style={styles.logoutText}>Sair da conta</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function Option({
+  label,
+  icon,
+}: {
+  label: string;
+  icon: React.ComponentProps<typeof Icon>["name"];
+}) {
+  return (
+    <TouchableOpacity style={styles.option}>
+      <Icon name={icon} size={22} color="#ffffff" />
+      <Text style={styles.optionText}>{label}</Text>
+      <Icon name="chevron-right" size={20} color="#8A8F9A" />
+    </TouchableOpacity>
+  );
+}

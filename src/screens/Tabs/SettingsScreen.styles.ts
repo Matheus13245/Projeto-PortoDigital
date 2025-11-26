@@ -5,7 +5,11 @@ import { COLORS } from "../../styles/theme";
 export const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.solidBackground, // #22252D
+    backgroundColor: COLORS.solidBackground,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.solidBackground,
   },
 
   header: {
@@ -25,14 +29,14 @@ export const styles = StyleSheet.create({
   optionsWrapper: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 40, // dá respiro antes da tab bar
+    paddingBottom: 40,
     gap: 14,
   },
 
   option: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: COLORS.cardBackground, // #1B1E24
+    backgroundColor: COLORS.cardBackground,
     padding: 16,
     borderRadius: 14,
     justifyContent: "space-between",
@@ -47,7 +51,7 @@ export const styles = StyleSheet.create({
   },
 
   logoutButton: {
-    marginTop: 20,
+    marginTop: 24,
     backgroundColor: "#E53935",
     paddingVertical: 16,
     borderRadius: 14,
