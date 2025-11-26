@@ -4,9 +4,13 @@ import {
   StyleSheet,
   Image,
   StatusBar,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   TouchableOpacity,
 } from "react-native";
 import { Text, TextInput, Button } from "react-native-paper";
+import { LinearGradient } from "expo-linear-gradient";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigation/RootNavigator";
 import { useAuth } from "../../context/AuthContext";
@@ -33,84 +37,121 @@ export default function LoginScreen({ navigation }: Props) {
     navigation.navigate("SignUp");
   };
 
+  const onSubmit = async () => {
+  alert("Cliquei no Entrar");   // 👈 teste rápido
+  try {
+    await signIn(email, senha);
+    navigation.replace("Main");
+  } catch (e: any) {
+    alert(e?.message ?? "Falha no login");
+  }
+};
+
+
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0f1216" />
+    <LinearGradient
+      colors={["#00131D", "#00313A", "#00E1A9", "#00FFC6"]}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.gradient}
+    >
+      <StatusBar barStyle="light-content" backgroundColor="transparent" />
 
-      {/* Topo com carro */}
-      <View style={styles.header}>
-        <View style={styles.carGlow}>
-          <Image source={loginCar} style={styles.carImage} resizeMode="contain" />
-        </View>
-        <Text style={styles.title}>BEM VINDO</Text>
-        <Text style={styles.footerText}>Seu app de recarga otimizada</Text> 
-      </View>
-
-      {/* Área do formulário */}
-      <View style={styles.formContainer}>
-  <TextInput
-  label="E-mail"
-  value={email}
-  onChangeText={setEmail}
-  mode="flat"
-  style={styles.input}
-  underlineColor="transparent"
-  textColor="#ffffff"               // 👈 força o texto digitado ser branco
-  theme={{
-    colors: {
-      primary: "#00f5a0",
-      onSurface: "#ffffff",         // 👈 cor do texto / ícone
-      placeholder: "#8e9aab",
-      background: "#262c35",
-    },
-  }}
-/>
-
-<TextInput
-  label="Senha"
-  value={senha}
-  onChangeText={setSenha}
-  secureTextEntry
-  mode="flat"
-  style={styles.input}
-  underlineColor="transparent"
-  textColor="#ffffff"
-  theme={{
-    colors: {
-      primary: "#00f5a0",
-      onSurface: "#ffffff",
-      placeholder: "#8e9aab",
-      background: "#262c35",
-    },
-  }}
-/>
-
-
-        <Button
-          mode="contained"
-          onPress={onSubmit}
-          style={styles.button}
-          labelStyle={styles.buttonLabel}
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
         >
-          Entrar
-        </Button>
+          {/* Topo com carro */}
+          <View style={styles.header}>
+            <View style={styles.carGlow}>
+              <Image
+                source={loginCar}
+                style={styles.carImage}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.title}>BEM VINDO</Text>
+            <Text style={styles.subtitle}>Seu app de recarga otimizada</Text>
+          </View>
 
-        <TouchableOpacity onPress={goToSignUp}>
-          <Text style={styles.footerText}>
-            Ainda não tem conta? <Text style={styles.footerLink}>Cadastre-se</Text>
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+          {/* Área do formulário */}
+          <View style={styles.formContainer}>
+            <TextInput
+              label="E-mail"
+              value={email}
+              onChangeText={setEmail}
+              mode="flat"
+              style={styles.input}
+              underlineColor="transparent"
+              textColor="#ffffff"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              theme={{
+                colors: {
+                  primary: "#00f5a0",
+                  onSurface: "#ffffff",
+                  placeholder: "#8e9aab",
+                  background: "#262c35",
+                },
+              }}
+            />
+
+            <TextInput
+              label="Senha"
+              value={senha}
+              onChangeText={setSenha}
+              secureTextEntry
+              mode="flat"
+              style={styles.input}
+              underlineColor="transparent"
+              textColor="#ffffff"
+              theme={{
+                colors: {
+                  primary: "#00f5a0",
+                  onSurface: "#ffffff",
+                  placeholder: "#8e9aab",
+                  background: "#262c35",
+                },
+              }}
+            />
+
+            <Button
+              mode="contained"
+              onPress={onSubmit}
+              style={styles.button}
+              labelStyle={styles.buttonLabel}
+            >
+              Entrar
+            </Button>
+
+            <TouchableOpacity onPress={goToSignUp} activeOpacity={0.7}>
+              <Text style={styles.footerText}>
+                Ainda não tem conta?{" "}
+                <Text style={styles.footerLink}>Cadastre-se</Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </LinearGradient>
   );
 }
 
 /* --------------------- ESTILOS --------------------- */
 
 const styles = StyleSheet.create({
-  container: {
+  flex: {
     flex: 1,
-    backgroundColor: "#0f1216",
+  },
+  gradient: {
+    flex: 1,
+  },
+  container: {
+    flexGrow: 1,
     paddingHorizontal: 24,
     paddingTop: 40,
     paddingBottom: 32,
@@ -124,7 +165,7 @@ const styles = StyleSheet.create({
     width: 180,
     height: 180,
     borderRadius: 90,
-    backgroundColor: "#0c1118",
+    backgroundColor: "rgba(0, 0, 0, 0.35)",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
@@ -146,8 +187,13 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     letterSpacing: 2,
   },
+  subtitle: {
+    marginTop: 6,
+    fontSize: 14,
+    color: "#e5e7eb",
+  },
   formContainer: {
-    backgroundColor: "#141820",
+    backgroundColor: "rgba(12, 17, 24, 0.92)",
     borderRadius: 24,
     paddingHorizontal: 20,
     paddingVertical: 24,
@@ -176,5 +222,5 @@ const styles = StyleSheet.create({
     color: "#00f5a0",
     fontWeight: "600",
   },
-});
 
+  });

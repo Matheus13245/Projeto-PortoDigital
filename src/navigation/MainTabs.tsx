@@ -18,41 +18,25 @@ const Tab = createBottomTabNavigator<TabParamList>();
 
 export default function MainTabs() {
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarShowLabel: true,
-        tabBarActiveTintColor: "#00f5a0",
-        tabBarInactiveTintColor: "#9ca3af",
-        tabBarStyle: {
-          height: 60,
-          backgroundColor: "#0f1216",
-          borderTopColor: "#111827",
-        },
-        headerTitleAlign: "center",
-        tabBarIcon: ({ color, size }) => {
-          let iconName: React.ComponentProps<typeof Feather>["name"];
+  <Tab.Navigator
+  screenOptions={{
+    headerShown: false,
+    tabBarStyle: {
+      backgroundColor: "#0D141A", // <<< novo fundo premium
+      borderTopColor: "transparent",
+      elevation: 0,
+      height: 72,
+      paddingBottom: 10,
+      paddingTop: 10,
+    },
+    tabBarActiveTintColor: "#00FFC6",
+    tabBarInactiveTintColor: "#7A8894",
+    sceneStyle: {
+      backgroundColor: "#0A0F14", // fundo de TODAS as telas do tab
+    },
+  }}
+> 
 
-          switch (route.name) {
-            case "CarInfo":
-              iconName = "battery";
-              break;
-              case "Map":
-              iconName = "map";
-              break;
-            case "Profile":
-              iconName = "user";
-              break;
-            case "Settings":
-              iconName = "settings";
-              break;
-            default:
-              iconName = "circle";
-          }
-
-          return <Feather name={iconName} size={size ?? 22} color={color} />;
-        },
-      })}
-    >
       <Tab.Screen
         name="CarInfo"
         component={CarInfoScreen}

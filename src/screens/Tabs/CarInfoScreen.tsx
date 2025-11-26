@@ -8,7 +8,6 @@ import {
 } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 
-// certifique-se de ter o arquivo: assets/car-hero.png
 import carHero from "../../../assets/car-hero.png";
 
 export default function CarInfoScreen() {
@@ -26,7 +25,6 @@ export default function CarInfoScreen() {
 
   const { carro } = user;
 
-  // frase abaixo do modelo, baseada na autonomia
   let statusLine = `${carro.autonomiaKm} km • ${carro.status}`;
   if (!carro.status) {
     statusLine =
@@ -35,16 +33,21 @@ export default function CarInfoScreen() {
         : `${carro.autonomiaKm} km • autonomia confortável`;
   }
 
+  const { updateBattery } = useAuth();
+
+  updateBattery(25);
+  updateBattery(45);
+  updateBattery(60);
+  updateBattery(85);
+
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0f1216" />
 
       {/* HERO DO CARRO */}
       <View style={styles.heroCard}>
-        {/* faixa diagonal branca */}
         <View style={styles.diagonalStripe} />
-
-        {/* imagem do carro */}
         <Image source={carHero} style={styles.carImage} resizeMode="contain" />
       </View>
 
@@ -112,29 +115,31 @@ const styles = StyleSheet.create({
 
   /* HERO */
   heroCard: {
-    width: "100%",
-    height: 220,
-    borderRadius: 32,
-    backgroundColor: "#161b22",
-    overflow: "hidden",
-    marginBottom: 20,
-    justifyContent: "flex-end",
-  },
+  width: "100%",
+  height: 260,
+  borderRadius: 32,
+  backgroundColor: "#161b22",
+  overflow: "hidden",
+  marginBottom: 20,
+  padding: 0, // garante que não existe espaço
+},
   diagonalStripe: {
     position: "absolute",
-    top: -80,
-    left: -40,
-    width: 260,
-    height: 160,
+    top: -110,
+    left: -60,
+    width: 320,
+    height: 200,
     backgroundColor: "#ffffff",
     transform: [{ rotate: "-25deg" }],
   },
-  carImage: {
-    width: "115%",
-    height: 160,
-    alignSelf: "flex-end",
-    marginRight: -30,
-  },
+ carImage: {
+  position: "absolute",
+  bottom: -20,      
+  left: -120,       
+  width: "180%",    
+  height: "120%",
+  resizeMode: "contain",
+},
 
   modelBox: {
     alignItems: "center",

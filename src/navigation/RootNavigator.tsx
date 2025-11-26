@@ -7,13 +7,13 @@ import LoginScreen from "../screens/Auth/LoginScreen";
 import SignUpScreen from "../screens/Auth/SignUpScreen";
 import MainTabs from "./MainTabs";
 import PostoDetailsScreen from "../screens/Info/PostoDetailsScreen";
-import FavoritePostsScreen from "../screens/Info/FavoritePostsScreen"; // << ADICIONADO
+import FavoritePostsScreen from "../screens/Info/FavoritePostsScreen";
 
 export type RootStackParamList = {
   Start: undefined;
   Login: undefined;
   SignUp: undefined;
-  Main:
+  Main?:
     | {
         screen?: string;
         params?: any;
@@ -27,7 +27,7 @@ export type RootStackParamList = {
     longitude: number;
   };
 
-  FavoritePosts: undefined; // << ADICIONADO
+  FavoritePosts: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -35,39 +35,18 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function RootNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Start">
-        <Stack.Screen
-          name="Start"
-          component={StartScreen}
-          options={{ title: "Bem-vindo" }}
-        />
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{ title: "Entrar" }}
-        />
-        <Stack.Screen
-          name="SignUp"
-          component={SignUpScreen}
-          options={{ title: "Criar conta" }}
-        />
-        <Stack.Screen
-          name="Main"
-          component={MainTabs}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="PostoDetails"
-          component={PostoDetailsScreen}
-          options={{ title: "Detalhes do Posto" }}
-        />
-
-        {/* NOVA TELA PARA FAVORITOS */}
-        <Stack.Screen
-          name="FavoritePosts"
-          component={FavoritePostsScreen}
-          options={{ title: "Postos Favoritos" }}
-        />
+      <Stack.Navigator
+        initialRouteName="Start"
+        screenOptions={{
+          headerShown: false, // tira a barra branca de TODAS as telas da stack
+        }}
+      >
+        <Stack.Screen name="Start" component={StartScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="SignUp" component={SignUpScreen} />
+        <Stack.Screen name="Main" component={MainTabs} />
+        <Stack.Screen name="PostoDetails" component={PostoDetailsScreen} />
+        <Stack.Screen name="FavoritePosts" component={FavoritePostsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

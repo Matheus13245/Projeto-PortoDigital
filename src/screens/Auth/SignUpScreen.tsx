@@ -13,7 +13,6 @@ import { useAuth } from "../../context/AuthContext";
 
 import loginCar from "../../../assets/login-car.png";
 
-
 type Props = NativeStackScreenProps<RootStackParamList, "SignUp">;
 
 export default function SignUpScreen({ navigation }: Props) {
@@ -67,24 +66,25 @@ export default function SignUpScreen({ navigation }: Props) {
           }}
         />
 
-<TextInput
-  label="E-mail"
-  value={nome}
-  onChangeText={setNome}
-  mode="flat"
-  style={styles.input}
-   textColor="#ffffff"
-  theme={{
-    colors: {
-      primary: "#00f5a0",
-      onSurface: "#ffffff",
-      placeholder: "#8e9aab",
-      background: "#262c35",
-    },
-  }}
-/>
-
-
+        <TextInput
+          label="E-mail"
+          value={email}
+          onChangeText={setEmail}
+          mode="flat"
+          style={styles.input}
+          underlineColor="transparent"
+          textColor="#ffffff"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          theme={{
+            colors: {
+              primary: "#00f5a0",
+              onSurface: "#ffffff",
+              placeholder: "#8e9aab",
+              background: "#262c35",
+            },
+          }}
+        />
 
         <TextInput
           label="Senha"
@@ -115,8 +115,7 @@ export default function SignUpScreen({ navigation }: Props) {
 
         <TouchableOpacity onPress={goToLogin}>
           <Text style={styles.footerText}>
-            Já tem conta?{" "}
-            <Text style={styles.footerLink}>Entrar</Text>
+            Já tem conta? <Text style={styles.footerLink}>Entrar</Text>
           </Text>
         </TouchableOpacity>
       </View>
@@ -133,7 +132,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 40,
     paddingBottom: 32,
-    justifyContent: "space-between",
+    justifyContent: "space_between",
   },
   header: {
     alignItems: "center",
@@ -196,4 +195,3 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
-
