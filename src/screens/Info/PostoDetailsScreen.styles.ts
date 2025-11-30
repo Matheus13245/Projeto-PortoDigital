@@ -10,24 +10,27 @@ export const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: COLORS.solidBackground, // fundo escuro padrão
+    backgroundColor: COLORS.solidBackground,
     paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 24,
+    paddingTop: 28,
+    paddingBottom: 20,
   },
 
+  // ---------- HEADER ----------
   title: {
-    color: COLORS.textPrimary, // branco
-    fontSize: 24,
+    color: COLORS.textPrimary,
+    fontSize: 26,
     fontWeight: "800",
-    marginBottom: 16,
+    marginBottom: 20,
+    textAlign: "left",
   },
 
+  // ---------- CARD ----------
   card: {
-    backgroundColor: COLORS.cardBackground, // ex: #1B1E24
+    backgroundColor: COLORS.cardBackground,
     borderRadius: 18,
-    padding: 16,
-    marginTop: 8,
+    padding: 18,
+    marginTop: 4,
     borderWidth: 1,
     borderColor: COLORS.cardBorder,
   },
@@ -36,7 +39,7 @@ export const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontSize: 18,
     fontWeight: "700",
-    marginBottom: 8,
+    marginBottom: 10,
   },
 
   sectionLabel: {
@@ -46,21 +49,8 @@ export const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  pickerWrapper: {
-    borderRadius: 12,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: COLORS.cardBorder,
-    marginBottom: 12,
-  },
-
-  picker: {
-    color: COLORS.textPrimary,
-    backgroundColor: "transparent",
-  },
-
   infoBox: {
-    marginTop: 8,
+    marginTop: 10,
     paddingVertical: 8,
   },
 
@@ -68,19 +58,19 @@ export const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontSize: 16,
     fontWeight: "700",
-    marginBottom: 8,
+    marginBottom: 10,
   },
 
   resultText: {
     color: COLORS.textSecondary,
     fontSize: 14,
-    marginBottom: 4,
+    marginBottom: 6,
   },
 
-  // Botão verde principal (Criar rota até o posto)
+  // ---------- BOTÃO PRINCIPAL ----------
   primaryButton: {
-    marginTop: 18,
-    backgroundColor: COLORS.primaryButton, // verde AX
+    marginTop: 22,
+    backgroundColor: COLORS.primaryButton,
     paddingVertical: 14,
     borderRadius: 999,
     alignItems: "center",
@@ -92,7 +82,7 @@ export const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  // (opcional) estilos para um botão secundário verde — caso queira
+  // ---------- BOTÃO SECUNDÁRIO ----------
   secondaryButton: {
     marginTop: 16,
     borderRadius: 999,
@@ -107,5 +97,14 @@ export const styles = StyleSheet.create({
     color: COLORS.primaryButton,
     fontWeight: "700",
     fontSize: 16,
+  },
+
+  // ---------- ERRO ----------
+  errorText: {
+    color: COLORS.error ?? "#FF5555",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
+    marginTop: 40,
   },
 });
