@@ -7,6 +7,8 @@ import MapScreen from "../screens/Tabs/MapScreen";
 import ProfileScreen from "../screens/Tabs/ProfileScreen";
 import SettingsScreen from "../screens/Tabs/SettingsScreen";
 
+import { COLORS } from "../styles/theme"; // 👈 ajuste do caminho
+
 export type TabParamList = {
   CarInfo: undefined;
   Map: undefined;
@@ -20,15 +22,21 @@ export default function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
+        headerShown: false, // 👈 some a faixa branca de todas as telas do tab
+
         tabBarShowLabel: true,
-        tabBarActiveTintColor: "#00f5a0",
-        tabBarInactiveTintColor: "#9ca3af",
+        tabBarActiveTintColor: COLORS.primaryButton,
+        tabBarInactiveTintColor: "#8A8F9A",
+
         tabBarStyle: {
-          height: 60,
-          backgroundColor: "#0f1216",
-          borderTopColor: "#111827",
+          height: 64,
+          backgroundColor: "#1B1E24", // preto suave, não preto puro
+          borderTopWidth: 0,
+          elevation: 0,
         },
+
         headerTitleAlign: "center",
+
         tabBarIcon: ({ color, size }) => {
           let iconName: React.ComponentProps<typeof Feather>["name"];
 
@@ -36,7 +44,7 @@ export default function MainTabs() {
             case "CarInfo":
               iconName = "battery";
               break;
-              case "Map":
+            case "Map":
               iconName = "map";
               break;
             case "Profile":
@@ -76,6 +84,3 @@ export default function MainTabs() {
     </Tab.Navigator>
   );
 }
-
-
-

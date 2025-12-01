@@ -1,8 +1,7 @@
-// src/screens/MapScreen.tsx
-import React, { useEffect, useState, useRef, useContext, useMemo } from "react";
+// src/screens/Tabs/MapScreen.tsx
+import React, { useEffect, useState, useRef, useContext } from "react";
 import {
   View,
-  StyleSheet,
   ActivityIndicator,
   Text,
   Image,
@@ -12,12 +11,14 @@ import {
 import MapView, { Marker, Region, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import MapViewDirections from "react-native-maps-directions";
+import { useNavigation, useRoute } from "@react-navigation/native";
+
 import mapStyle from "../../config/mapStyle.json";
 import { postos, Posto } from "../../data/postos";
 import FloatingButton from "../../components/FloatingButton";
-import { useNavigation, useRoute } from "@react-navigation/native";
 import { VehicleContext } from "../../context/VehicleContext";
 import { simulateChargeThenReach } from "../../utils/autonomyHelpers";
+import { styles } from "./MapScreen.styles";
 
 const GOOGLE_MAPS_APIKEY = "AIzaSyBp1V7-y6aMDOj2-wRBNFdjpGb47QrSjCY";
 
@@ -36,9 +37,11 @@ export default function MapScreen() {
 
   const { profile, soc } = useContext(VehicleContext);
 
-  // evita cliques rápidos/duplicados em postos
-  const [processingPostoId, setProcessingPostoId] = useState<number | null>(null);
-  const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
+  const [processingPostoId, setProcessingPostoId] = useState<number | null>(
+    null
+  );
+  const [location, setLocation] =
+    useState<Location.LocationObjectCoords | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [destino, setDestino] = useState<{
@@ -47,8 +50,9 @@ export default function MapScreen() {
     nome?: string;
   } | null>(null);
 
-  // waypoints (postos inseridos no roteiro)
-  const [waypoints, setWaypoints] = useState<{ latitude: number; longitude: number }[]>([]);
+  const [waypoints, setWaypoints] = useState<
+    { latitude: number; longitude: number }[]
+  >([]);
 
   const mapRef = useRef<MapView>(null);
 
@@ -106,7 +110,6 @@ export default function MapScreen() {
       }
     : undefined;
 
-  // distância haversine (km)
   const calcularDistanciaKm = (
     lat1: number,
     lon1: number,
@@ -184,7 +187,7 @@ export default function MapScreen() {
   if (errorMsg) {
     return (
       <View style={styles.center}>
-        <Text>{errorMsg}</Text>
+        <Text style={styles.errorText}>{errorMsg}</Text>
       </View>
     );
   }
@@ -192,17 +195,13 @@ export default function MapScreen() {
   if (!location || !region) {
     return (
       <View style={styles.center}>
-        <Text>Localização não encontrada</Text>
+        <Text style={styles.errorText}>Localização não encontrada</Text>
       </View>
     );
   }
 
-  // handler chamado ao tocar no marcador de posto
-  
-  // Handler seguro para evitar múltiplos cliques rápidos que causam crashes
   const onMarkerPressSafe = (posto: Posto) => {
     if (processingPostoId !== null) {
-      // já processando outro posto — ignora clique
       return;
     }
     setProcessingPostoId(posto.id);
@@ -213,23 +212,25 @@ export default function MapScreen() {
         nome: posto.nome,
         latitude: posto.latitude,
         longitude: posto.longitude,
-        userLocation: location ? { latitude: location.latitude, longitude: location.longitude } : undefined
+        userLocation: location
+          ? { latitude: location.latitude, longitude: location.longitude }
+          : undefined,
       });
     } catch (err) {
       console.error("Erro ao navegar para PostoDetails:", err);
       Alert.alert("Erro", "Não foi possível abrir detalhes do posto.");
     } finally {
-      // pequeno delay para prevenir double-clicks em sequência
       setTimeout(() => setProcessingPostoId(null), 700);
     }
   };
 
-const onStationPress = async (posto: Posto) => {
+  const onStationPress = async (posto: Posto) => {
     try {
       const origin = { lat: location.latitude, lon: location.longitude };
-      const target = destino ? { lat: destino.latitude, lon: destino.longitude } : origin;
+      const target = destino
+        ? { lat: destino.latitude, lon: destino.longitude }
+        : origin;
 
-      // simulateChargeThenReach retorna vários dados úteis
       const result = simulateChargeThenReach(
         origin,
         { lat: posto.latitude, lon: posto.longitude ?? {} },
@@ -249,12 +250,16 @@ const onStationPress = async (posto: Posto) => {
       }
 
       const minutes = Math.round(result.chargeMinutes);
-      const driveToStationMin = Math.round((result.distToStationKm / 40) * 60); // 40 km/h média urbana
+      const driveToStationMin = Math.round(
+        (result.distToStationKm / 40) * 60
+      );
       const canContinueText = result.canReachTargetAfterCharge ? "Sim" : "Não";
 
       const message =
         `Distância até posto: ${result.distToStationKm.toFixed(1)} km\n` +
-        `Distância do posto ao destino: ${result.distStationToTargetKm.toFixed(1)} km\n` +
+        `Distância do posto ao destino: ${result.distStationToTargetKm.toFixed(
+          1
+        )} km\n` +
         `Carga necessária: ${result.kwhToAdd.toFixed(2)} kWh\n` +
         `Tempo estimado de recarga: ${minutes} min\n` +
         `Consegue continuar até o destino após carga? ${canContinueText}`;
@@ -266,12 +271,10 @@ const onStationPress = async (posto: Posto) => {
           {
             text: "Inserir no roteiro",
             onPress: () => {
-              // adiciona waypoint (posto) antes do destino
               setWaypoints((prev) => [
                 ...prev,
                 { latitude: posto.latitude, longitude: posto.longitude },
               ]);
-              // centraliza no posto
               mapRef.current?.animateToRegion(
                 {
                   latitude: posto.latitude,
@@ -303,24 +306,25 @@ const onStationPress = async (posto: Posto) => {
       );
     } catch (err) {
       console.error("Erro onStationPress:", err);
-      Alert.alert("Erro", "Falha ao verificar autonomia: " + String(err));
+      Alert.alert(
+        "Erro",
+        "Falha ao verificar autonomia: " + String(err)
+      );
     }
   };
 
-  // função para decidir cor do marcador (verde se alcançável até o posto com soc atual)
-
-  // compute marker colors consistently with simulateChargeThenReach (memoized)
-  
-  // marker color based on simple distance check to avoid calling simulateChargeThenReach during render
   const markerColorFor = (posto: Posto) => {
-    if (!location || !profile) return 'gray';
+    if (!location || !profile) return "gray";
     const origin = { lat: location.latitude, lon: location.longitude };
-    const distKm = calcularDistanciaKm(origin.lat, origin.lon, posto.latitude, posto.longitude);
+    const distKm = calcularDistanciaKm(
+      origin.lat,
+      origin.lon,
+      posto.latitude,
+      posto.longitude
+    );
     const availableKm = profile ? profile.range_km * (soc / 100) : 0;
-    return distKm <= availableKm ? 'green' : 'red';
+    return distKm <= availableKm ? "green" : "red";
   };
-
-
 
   return (
     <View style={styles.container}>
@@ -342,16 +346,17 @@ const onStationPress = async (posto: Posto) => {
             }}
             title={posto.nome}
             description={posto.endereco}
-            onPress={() =>
-              // abertura do modal de detalhes preservada para navegação direta
-              onMarkerPressSafe(posto)
-            }
-            onCalloutPress={() => onStationPress(posto)} // ao abrir callout, chama verificação
+            onPress={() => onMarkerPressSafe(posto)}
+            onCalloutPress={() => onStationPress(posto)}
           >
-            <View style={[styles.markerWrap]}>
+            <View style={styles.markerWrap}>
               <Image
                 source={require("../../assets/gas-station.png")}
-                style={{ width: 35, height: 35, tintColor: markerColorFor(posto) }}
+                style={{
+                  width: 35,
+                  height: 35,
+                  tintColor: markerColorFor(posto),
+                }}
               />
             </View>
           </Marker>
@@ -370,7 +375,6 @@ const onStationPress = async (posto: Posto) => {
             waypoints={waypoints}
             optimizeWaypoints={false}
             onReady={(result) => {
-              // ajusta viewport para incluir toda rota
               mapRef.current?.fitToCoordinates(result.coordinates, {
                 edgePadding: {
                   top: 100,
@@ -390,29 +394,13 @@ const onStationPress = async (posto: Posto) => {
 
       <FloatingButton />
 
-      <TouchableOpacity style={styles.button} onPress={handlePostoMaisProximo}>
-        <Text style={styles.buttonText}>Posto mais próximo</Text>
+      <TouchableOpacity
+        style={styles.nearestButton}
+        onPress={handlePostoMaisProximo}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.nearestButtonText}>Posto mais próximo</Text>
       </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  map: { flex: 1 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-
-  button: {
-    position: "absolute",
-    bottom: 30,
-    left: 20,
-    backgroundColor: "#007AFF",
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 25,
-    elevation: 4,
-  },
-  buttonText: { color: "#fff", fontWeight: "bold" },
-
-  markerWrap: { alignItems: "center", justifyContent: "center" },
-});
