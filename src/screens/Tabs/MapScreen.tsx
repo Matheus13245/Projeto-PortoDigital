@@ -22,6 +22,11 @@ import { styles } from "./MapScreen.styles";
 
 const GOOGLE_MAPS_APIKEY = "AIzaSyBp1V7-y6aMDOj2-wRBNFdjpGb47QrSjCY";
 
+// ------------------------------
+// MOCK visual: postos fora de alcance
+// ------------------------------
+const MOCK_OUT_OF_RANGE = [1, 4, 5, 6, 7, 12, 13];
+
 type MapRouteParams = {
   rotaDestino?: {
     latitude: number;
@@ -37,11 +42,8 @@ export default function MapScreen() {
 
   const { profile, soc } = useContext(VehicleContext);
 
-  const [processingPostoId, setProcessingPostoId] = useState<number | null>(
-    null
-  );
-  const [location, setLocation] =
-    useState<Location.LocationObjectCoords | null>(null);
+  const [processingPostoId, setProcessingPostoId] = useState<number | null>(null);
+  const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [destino, setDestino] = useState<{
@@ -56,6 +58,7 @@ export default function MapScreen() {
 
   const mapRef = useRef<MapView>(null);
 
+  // Se veio rota pré-definida de outra tela
   useEffect(() => {
     if (params?.rotaDestino) {
       setDestino(params.rotaDestino);
@@ -71,11 +74,11 @@ export default function MapScreen() {
     }
   }, [params]);
 
+  // Obter localização
   useEffect(() => {
     (async () => {
       try {
-        const { status } =
-          await Location.requestForegroundPermissionsAsync();
+        const { status } = await Location.requestForegroundPermissionsAsync();
 
         if (status !== "granted") {
           setErrorMsg("Permissão de localização negada");
@@ -122,19 +125,9 @@ export default function MapScreen() {
     const dLon = toRad(lon2 - lon1);
     const a =
       Math.sin(dLat / 2) ** 2 +
-      Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) ** 2;
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
-  };
-
-  const handlePressPosto = (posto: Posto) => {
-    setDestino({
-      latitude: posto.latitude,
-      longitude: posto.longitude,
-      nome: posto.nome,
-    });
   };
 
   const handlePostoMaisProximo = () => {
@@ -200,30 +193,30 @@ export default function MapScreen() {
     );
   }
 
-  const onMarkerPressSafe = (posto: Posto) => {
-    if (processingPostoId !== null) {
-      return;
-    }
+  // -------------------------------------------------------------
+  // 🔥 Agora SEM bloqueio — SEMPRE abre detalhes do posto
+  // -------------------------------------------------------------
+  const onMarkerPressOpenDetails = (posto: Posto) => {
+    if (processingPostoId !== null) return;
+
     setProcessingPostoId(posto.id);
 
-    try {
-      navigation.navigate("PostoDetails", {
-        id: posto.id,
-        nome: posto.nome,
-        latitude: posto.latitude,
-        longitude: posto.longitude,
-        userLocation: location
-          ? { latitude: location.latitude, longitude: location.longitude }
-          : undefined,
-      });
-    } catch (err) {
-      console.error("Erro ao navegar para PostoDetails:", err);
-      Alert.alert("Erro", "Não foi possível abrir detalhes do posto.");
-    } finally {
-      setTimeout(() => setProcessingPostoId(null), 700);
-    }
+    navigation.navigate("PostoDetails", {
+      id: posto.id,
+      nome: posto.nome,
+      latitude: posto.latitude,
+      longitude: posto.longitude,
+      userLocation: location
+        ? { latitude: location.latitude, longitude: location.longitude }
+        : undefined,
+    });
+
+    setTimeout(() => setProcessingPostoId(null), 700);
   };
 
+  // -------------------------------------------------------------
+  // 🔥 CalloutPress agora também NÃO bloqueia mais nada
+  // -------------------------------------------------------------
   const onStationPress = async (posto: Posto) => {
     try {
       const origin = { lat: location.latitude, lon: location.longitude };
@@ -240,92 +233,54 @@ export default function MapScreen() {
         1.1
       );
 
-      if (!result.canReachStation) {
-        Alert.alert(
-          "Impossível alcançar",
-          "Com o SOC atual o veículo não alcança esse posto.",
-          [{ text: "OK" }]
-        );
-        return;
-      }
-
       const minutes = Math.round(result.chargeMinutes);
-      const driveToStationMin = Math.round(
-        (result.distToStationKm / 40) * 60
-      );
-      const canContinueText = result.canReachTargetAfterCharge ? "Sim" : "Não";
-
-      const message =
-        `Distância até posto: ${result.distToStationKm.toFixed(1)} km\n` +
-        `Distância do posto ao destino: ${result.distStationToTargetKm.toFixed(
-          1
-        )} km\n` +
-        `Carga necessária: ${result.kwhToAdd.toFixed(2)} kWh\n` +
-        `Tempo estimado de recarga: ${minutes} min\n` +
-        `Consegue continuar até o destino após carga? ${canContinueText}`;
 
       Alert.alert(
-        "Verificação de autonomia",
-        message,
+        "Informações do posto",
+        `Distância até posto: ${result.distToStationKm.toFixed(1)} km\n` +
+          `Carga necessária estimada: ${result.kwhToAdd.toFixed(2)} kWh\n` +
+          `Tempo estimado de recarga: ${minutes} min`,
         [
           {
-            text: "Inserir no roteiro",
-            onPress: () => {
-              setWaypoints((prev) => [
-                ...prev,
-                { latitude: posto.latitude, longitude: posto.longitude },
-              ]);
-              mapRef.current?.animateToRegion(
-                {
-                  latitude: posto.latitude,
-                  longitude: posto.longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                },
-                800
-              );
-            },
+            text: "Ver detalhes",
+            onPress: () =>
+              navigation.navigate("PostoDetails", {
+                id: posto.id,
+                nome: posto.nome,
+                latitude: posto.latitude,
+                longitude: posto.longitude,
+                userLocation: location
+                  ? { latitude: location.latitude, longitude: location.longitude }
+                  : undefined,
+              }),
           },
-          {
-            text: "Navegar até posto",
-            onPress: () => {
-              mapRef.current?.animateToRegion(
-                {
-                  latitude: posto.latitude,
-                  longitude: posto.longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                },
-                800
-              );
-            },
-          },
-          { text: "Cancelar", style: "cancel" },
-        ],
-        { cancelable: true }
+          { text: "Fechar", style: "cancel" },
+        ]
       );
     } catch (err) {
       console.error("Erro onStationPress:", err);
-      Alert.alert(
-        "Erro",
-        "Falha ao verificar autonomia: " + String(err)
-      );
+      Alert.alert("Erro", "Falha ao obter dados: " + String(err));
     }
   };
 
   const markerColorFor = (posto: Posto) => {
     if (!location || !profile) return "gray";
-    const origin = { lat: location.latitude, lon: location.longitude };
+
     const distKm = calcularDistanciaKm(
-      origin.lat,
-      origin.lon,
+      location.latitude,
+      location.longitude,
       posto.latitude,
       posto.longitude
     );
-    const availableKm = profile ? profile.range_km * (soc / 100) : 0;
+
+    const availableKm = profile.range_km * (soc / 100);
+
     return distKm <= availableKm ? "green" : "red";
   };
 
+  // =====================================================================
+  // RENDER
+  // =====================================================================
   return (
     <View style={styles.container}>
       <MapView
@@ -337,30 +292,35 @@ export default function MapScreen() {
         customMapStyle={mapStyle}
         initialRegion={region}
       >
-        {postos.map((posto) => (
-          <Marker
-            key={posto.id}
-            coordinate={{
-              latitude: posto.latitude,
-              longitude: posto.longitude,
-            }}
-            title={posto.nome}
-            description={posto.endereco}
-            onPress={() => onMarkerPressSafe(posto)}
-            onCalloutPress={() => onStationPress(posto)}
-          >
-            <View style={styles.markerWrap}>
-              <Image
-                source={require("../../assets/gas-station.png")}
-                style={{
-                  width: 35,
-                  height: 35,
-                  tintColor: markerColorFor(posto),
-                }}
-              />
-            </View>
-          </Marker>
-        ))}
+        {postos.map((posto) => {
+          const isOut = MOCK_OUT_OF_RANGE.includes(posto.id);
+
+          return (
+            <Marker
+              key={posto.id}
+              coordinate={{
+                latitude: posto.latitude,
+                longitude: posto.longitude,
+              }}
+              title={posto.nome}
+              description={posto.endereco}
+              onPress={() => onMarkerPressOpenDetails(posto)}
+              onCalloutPress={() => onStationPress(posto)}
+            >
+              <View style={styles.markerWrap}>
+                <Image
+                  source={require("../../assets/gas-station.png")}
+                  style={{
+                    width: 35,
+                    height: 35,
+                    tintColor: isOut ? "#999" : markerColorFor(posto),
+                    opacity: isOut ? 0.45 : 1,
+                  }}
+                />
+              </View>
+            </Marker>
+          );
+        })}
 
         {destino && (
           <MapViewDirections
@@ -376,18 +336,11 @@ export default function MapScreen() {
             optimizeWaypoints={false}
             onReady={(result) => {
               mapRef.current?.fitToCoordinates(result.coordinates, {
-                edgePadding: {
-                  top: 100,
-                  right: 50,
-                  bottom: 100,
-                  left: 50,
-                },
+                edgePadding: { top: 100, right: 50, bottom: 100, left: 50 },
                 animated: true,
               });
             }}
-            onError={(err) => {
-              console.warn("MapViewDirections error:", err);
-            }}
+            onError={(err) => console.warn("MapViewDirections error:", err)}
           />
         )}
       </MapView>

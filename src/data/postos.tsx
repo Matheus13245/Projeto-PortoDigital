@@ -14,6 +14,7 @@ export interface Posto {
   longitude: number;
   endereco?: string;
   fila: Fila;          // apenas um tipo
+  outOfRange?: boolean; // ➜ novo campo para mockar fora de alcance
 }
 
 export const postos: Posto[] = [
@@ -56,6 +57,10 @@ export const postos: Posto[] = [
       fila: 4,
     },
   },
+
+  // -------------------------
+  // MOCKADO COMO FORA DE ALCANCE
+  // -------------------------
   {
     id: 4,
     tags: {},
@@ -68,7 +73,9 @@ export const postos: Posto[] = [
       vagas: 2,
       fila: 3,
     },
+    outOfRange: true,
   },
+
   {
     id: 5,
     tags: {},
@@ -81,7 +88,12 @@ export const postos: Posto[] = [
       vagas: 1,
       fila: 2,
     },
+        outOfRange: true,
   },
+
+  // -------------------------
+  // MOCKADO COMO FORA DE ALCANCE
+  // -------------------------
   {
     id: 6,
     tags: {},
@@ -94,7 +106,9 @@ export const postos: Posto[] = [
       vagas: 2,
       fila: 2,
     },
+    outOfRange: true,
   },
+
   {
     id: 7,
     tags: {},
@@ -160,6 +174,10 @@ export const postos: Posto[] = [
       fila: 3,
     },
   },
+
+  // -------------------------
+  // MOCKADO COMO FORA DE ALCANCE
+  // -------------------------
   {
     id: 12,
     tags: {},
@@ -172,7 +190,9 @@ export const postos: Posto[] = [
       vagas: 1,
       fila: 2,
     },
+    outOfRange: true,
   },
+
   {
     id: 13,
     tags: {},
@@ -185,6 +205,7 @@ export const postos: Posto[] = [
       vagas: 2,
       fila: 2,
     },
+        outOfRange: true,
   },
   {
     id: 14,
