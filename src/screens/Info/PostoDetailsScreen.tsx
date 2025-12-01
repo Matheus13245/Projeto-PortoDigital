@@ -32,11 +32,11 @@ export default function PostoDetailsScreen() {
     );
   }
 
-  const { nome, latitude, longitude, fila } = posto;
+  const { nome, latitude, longitude, fila, outOfRange } = posto;
 
   const [calculatedTime, setCalculatedTime] = useState<number | null>(null);
 
-  // Cálculo baseado APENAS no tipo existente
+  // Cálculo baseado no tipo existente
   useEffect(() => {
     if (!fila) return;
 
@@ -66,6 +66,8 @@ export default function PostoDetailsScreen() {
   }, [fila]);
 
   const handleCriarRota = () => {
+    if (outOfRange) return; // BLOQUEIA AÇÃO
+
     navigation.navigate("Main", {
       screen: "Map",
       params: {
@@ -77,6 +79,8 @@ export default function PostoDetailsScreen() {
       },
     });
   };
+
+  const buttonDisabled = outOfRange;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -106,12 +110,33 @@ export default function PostoDetailsScreen() {
               : "-"}
           </Text>
 
-          <TouchableOpacity style={styles.primaryButton} onPress={handleCriarRota}>
-            <Text style={styles.primaryButtonText}>Criar rota até o posto</Text>
+          {outOfRange && (
+            <Text
+              style={{
+                color: "red",
+                marginTop: 10,
+                fontWeight: "bold",
+                fontSize: 16,
+              }}
+            >
+              ⚠ Este posto está fora de alcance!
+            </Text>
+          )}
+
+          <TouchableOpacity
+            style={[
+              styles.primaryButton,
+              buttonDisabled && { backgroundColor: "#888" },
+            ]}
+            onPress={handleCriarRota}
+            disabled={buttonDisabled}
+          >
+            <Text style={styles.primaryButtonText}>
+              {buttonDisabled ? "Fora de alcance" : "Criar rota até o posto"}
+            </Text>
           </TouchableOpacity>
         </View>
 
-        {/* FAVORITO */}
         <FavoriteButton posto={{ id, nome, latitude, longitude }} />
       </View>
     </SafeAreaView>
