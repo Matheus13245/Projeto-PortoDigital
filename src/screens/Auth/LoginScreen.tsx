@@ -58,7 +58,7 @@ export default function LoginScreen({ navigation }: Props) {
             <View style={styles.carGlow}>
               <Image source={loginCar} style={styles.carImage} resizeMode="contain" />
             </View>
-            <Text style={styles.title}>BEM VINDO</Text>
+            <Text style={styles.title}>BEM-VINDO</Text>
             <Text style={styles.subtitle}>Seu app de recarga otimizada</Text>
           </View>
 
