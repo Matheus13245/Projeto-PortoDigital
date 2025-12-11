@@ -30,6 +30,7 @@ export const postos: Posto[] = [
       vagas: 2,
       fila: 5,
     },
+    outOfRange: true,
   },
   {
     id: 2,
@@ -121,6 +122,7 @@ export const postos: Posto[] = [
       vagas: 1,
       fila: 2,
     },
+    outOfRange: true,
   },
   {
     id: 8,

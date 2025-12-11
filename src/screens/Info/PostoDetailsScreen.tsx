@@ -1,4 +1,3 @@
-// src/screens/Info/PostoDetailsScreen.tsx
 import React, { useEffect, useState } from "react";
 import { SafeAreaView, View, Text, TouchableOpacity } from "react-native";
 import {
@@ -135,6 +134,14 @@ export default function PostoDetailsScreen() {
               {buttonDisabled ? "Fora de alcance" : "Criar rota até o posto"}
             </Text>
           </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.secondaryButtonText}>Mapa</Text>
+          </TouchableOpacity>
+
         </View>
 
         <FavoriteButton posto={{ id, nome, latitude, longitude }} />
